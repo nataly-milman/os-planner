@@ -1,65 +1,77 @@
 package net.planner.planet
 
+import android.Manifest
 import android.app.Activity
 import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.ContentValues
+import android.content.pm.PackageManager
 import android.database.Cursor
 import android.net.Uri
 import android.provider.CalendarContract
+import android.util.Log
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import java.text.SimpleDateFormat
+import java.util.*
+import java.util.concurrent.TimeUnit
+import kotlin.collections.ArrayList
 
-class GoogleCalenderCommunicator {
+
+class GoogleCalenderCommunicator : ActivityCompat.OnRequestPermissionsResultCallback {
+
+    private val TAG = "GoogleCalenderCommunicator"
+    private val ONE_MONTH_MILLIS = TimeUnit.DAYS.toMillis(30)
+
+    private val calenderIds = ArrayList<Long>()
+
 
     // Projection array. Creating indices for this array instead of doing
     // dynamic lookups improves performance.
     private val CALENDAR_PROJECTION: Array<String> = arrayOf(
         CalendarContract.Calendars._ID,                     // 0
-        CalendarContract.Calendars.ACCOUNT_NAME,            // 1
-        CalendarContract.Calendars.CALENDAR_DISPLAY_NAME,   // 2
-        CalendarContract.Calendars.OWNER_ACCOUNT            // 3
+        CalendarContract.Calendars.CALENDAR_DISPLAY_NAME,   // 1
+        CalendarContract.Calendars.OWNER_ACCOUNT            // 2
     )
 
     private val EVENT_INSTANCE_PROJECTION: Array<String> = arrayOf(
-        CalendarContract.Instances.CALENDAR_ID, // 0
+        CalendarContract.Instances.EVENT_ID, // 0
         CalendarContract.Instances.BEGIN, // 1
         CalendarContract.Instances.END // 2
     )
 
     companion object {
+
+        const val PERMISSION_REQUEST_CODE = 99
+
         // The indices for Calender projection array
         private const val PROJECTION_ID_INDEX: Int = 0
-        private const val PROJECTION_ACCOUNT_NAME_INDEX: Int = 1
-        private const val PROJECTION_DISPLAY_NAME_INDEX: Int = 2
-        private const val PROJECTION_OWNER_ACCOUNT_INDEX: Int = 3
+        private const val PROJECTION_DISPLAY_NAME_INDEX: Int = 1
+        private const val PROJECTION_OWNER_ACCOUNT_INDEX: Int = 2
 
         // The indices for Event projection array
-        // @TODO not sure about the numbers here, need to check what we get
         const val PROJECTION_EVENT_ID_INDEX: Int = 0
         const val PROJECTION_EVENT_BEGIN_INDEX: Int = 1
         const val PROJECTION_EVENT_END_INDEX: Int = 2
     }
 
-    private val calenderIds = ArrayList<Long>()
 
-    fun findAccountCalendars(accountUser: String, accountType: String, accountOwner: String, caller: Activity) {
-        // Run query
-        val contentResolver = caller.contentResolver
+    fun findAccountCalendars(contentResolver: ContentResolver):  ArrayList<Long> {
+
+        // Run query to get all calendars in device
         val uri: Uri = CalendarContract.Calendars.CONTENT_URI
-        val selection: String = "((${CalendarContract.Calendars.ACCOUNT_NAME} = ?) AND (" +
-                "${CalendarContract.Calendars.ACCOUNT_TYPE} = ?) AND (" +
-                "${CalendarContract.Calendars.OWNER_ACCOUNT} = ?))"
-        val selectionArgs: Array<String> = arrayOf(accountUser, accountType, accountOwner)
-        val cur: Cursor? = contentResolver.query(uri, CALENDAR_PROJECTION, selection, selectionArgs, null)
+        val cur: Cursor? = contentResolver.query(uri, CALENDAR_PROJECTION, null, null, null)
 
+        // Get calender Id's
         while (cur?.moveToNext() == true) {
-            // Get the field values
             val calenderID: Long = cur.getLong(PROJECTION_ID_INDEX)
             val displayName: String = cur.getString(PROJECTION_DISPLAY_NAME_INDEX)
-            val accountName: String = cur.getString(PROJECTION_ACCOUNT_NAME_INDEX)
             val ownerName: String = cur.getString(PROJECTION_OWNER_ACCOUNT_INDEX)
-            // TODO store calenders information - see if there's more then one
             calenderIds.add(calenderID)
+            Log.d(TAG, "findAccountCalendars: Found calender with name $displayName and id $calenderID of owner $ownerName ")
         }
+
+        return calenderIds
     }
 
 
@@ -71,7 +83,7 @@ class GoogleCalenderCommunicator {
             put(CalendarContract.Events.TITLE, eventTitle)
             put(CalendarContract.Events.DESCRIPTION, eventDescription?: "")
             put(CalendarContract.Events.CALENDAR_ID, calenderId)
-            put(CalendarContract.Events.EVENT_TIMEZONE, timezone ?: "America/Los_Angeles")
+            put(CalendarContract.Events.EVENT_TIMEZONE, timezone ?: TimeZone.getDefault().displayName)
         }
         val uri: Uri? = contentResolver.insert(CalendarContract.Events.CONTENT_URI, values)
         // @TODO find out how to get confirmation since this is async probably relates to https://developer.android.com/reference/android/content/AsyncQueryHandler
@@ -83,10 +95,19 @@ class GoogleCalenderCommunicator {
         return eventID
     }
 
+//    fun insertTrialEvent(contentResolver: ContentResolver) {
+//        val startMillis = System.currentTimeMillis()
+//        val endMillis = startMillis
+//        val eventTitle = "trying library"
+//        val calendarId = 3L
+//        val timeZone = TimeZone.getDefault().displayName
+//        Log.d(TAG, "Time zone is $timeZone ")
+//        insertEvent(contentResolver, startMillis, endMillis, eventTitle, calendarId, timeZone)
+//    }
 
-    fun getCalendarEvents(contentResolver: ContentResolver, calenderId: Long, startMillis: Long, endMillis: Long) {
+    // @TODO Do not return anything yet because I want to have the Event class first
+    private fun getCalendarEvents(contentResolver: ContentResolver, calenderId: Long, startMillis: Long, endMillis: Long) {
 
-        // @TODO maybe use DTSTART instead
         val selection: String = "${CalendarContract.Instances.CALENDAR_ID} = ?"
 
         val builder: Uri.Builder = CalendarContract.Instances.CONTENT_URI.buildUpon()
@@ -95,14 +116,101 @@ class GoogleCalenderCommunicator {
 
         val selectionArgs: Array<String> = arrayOf(calenderId.toString())
 
-        val cur: Cursor? = contentResolver.query(builder.build(), EVENT_INSTANCE_PROJECTION, selection, selectionArgs, null
+        val cur: Cursor? = contentResolver.query(builder.build(), EVENT_INSTANCE_PROJECTION, selection, selectionArgs, null)
 
-        // @TODO go over results in while and extract the needed values for events
+        while (cur?.moveToNext() == true) {
+            // Get the field values
+            val eventID: Long = cur.getLong(PROJECTION_EVENT_ID_INDEX)
+            val eventStart: String = cur.getString(PROJECTION_EVENT_BEGIN_INDEX)
+            val eventEnd: String = cur.getString(PROJECTION_EVENT_END_INDEX)
 
-        )
+            val startDate = Calendar.getInstance().apply {
+                timeInMillis = eventStart.toLong()
+            }
+
+            val endDate = Calendar.getInstance().apply {
+                timeInMillis = eventEnd.toLong()
+            }
+            val formatter = SimpleDateFormat("MM/dd/yyyy")
+            Log.d(TAG, "getCalendarEvents: found event with id $eventID, starts ${formatter.format(startDate.time)} ends ${formatter.format(endDate.time)} from calendar $calenderId ")
+        }
+    }
+
+
+    fun getUserEvents(caller:Activity, startMillis: Long? = null, endMillis: Long? = null) {
+        if (!haveCalendarReadWritePermissions(caller)) {
+            requestCalendarReadWritePermission(caller)
+            Log.d(TAG, "Needed permissions - returning")
+            return
+        }
+
+        val contentResolver = caller.contentResolver
+        findAccountCalendars(contentResolver)
+
+        val strongStartMillis = startMillis ?: System.currentTimeMillis() - ONE_MONTH_MILLIS
+        val strongEndMillis = endMillis ?: System.currentTimeMillis()
+
+        if (calenderIds.isNotEmpty()) {
+            for (id in calenderIds ) {
+                getCalendarEvents(contentResolver, id, strongStartMillis, strongEndMillis)
+            }
+        } else {
+            Log.e(TAG, "getUserEvents: No calendar Ids")
+        }
 
     }
 
-    // @TODO add permission check like in: https://github.com/DilipSinghPanwar/AddEventGoogleCalender/blob/master/app/src/main/java/com/androidevs/CalendarHelper.java
 
+    fun requestCalendarReadWritePermission(caller: Activity) {
+        val permissionList: MutableList<String> = ArrayList()
+
+        if (ContextCompat.checkSelfPermission(caller, Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
+            permissionList.add(Manifest.permission.WRITE_CALENDAR)
+        }
+
+        if (ContextCompat.checkSelfPermission(caller, Manifest.permission.READ_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
+            permissionList.add(Manifest.permission.READ_CALENDAR)
+        }
+
+        if (permissionList.size > 0) {
+            val permissionArray = arrayOfNulls<String>(permissionList.size)
+            for (i in permissionList.indices) {
+                permissionArray[i] = permissionList[i]
+            }
+
+            ActivityCompat.requestPermissions(
+                caller,
+                permissionArray,
+                PERMISSION_REQUEST_CODE
+            )
+
+        }
+    }
+
+
+    fun haveCalendarReadWritePermissions(caller: Activity): Boolean {
+
+        var permissionCheck = ContextCompat.checkSelfPermission(
+            caller,
+            Manifest.permission.READ_CALENDAR
+        )
+
+        if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
+            permissionCheck = ContextCompat.checkSelfPermission(
+                caller,
+                Manifest.permission.WRITE_CALENDAR
+            )
+
+            if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
+                return true
+            }
+        }
+
+        return false
+    }
+
+    // @TODO Either we implement this here was some kind of object that remembers the call to the function, or the caller needs to implements this to remember to call again
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        Log.d(TAG, "Permissions granted")
+    }
 }
