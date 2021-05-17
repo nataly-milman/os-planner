@@ -60,11 +60,11 @@ public class PlannerEvent {
     }
 
     public void setStartTime(Date startTime) {
-        if (startTime.after(this.endTime)) {
-            // todo - a) forbid b) set end to start + min event length c) exception
-            return;
-        }
+        long timeDiff = this.endTime.getTime() - this.startTime.getTime();
         this.startTime = startTime;
+        Date endTime = (Date) startTime.clone();
+        endTime.setTime(startTime.getTime() + timeDiff);
+        this.endTime = endTime;
     }
 
     public Date getEndTime() {
@@ -73,7 +73,7 @@ public class PlannerEvent {
 
     public void setEndTime(Date endTime) {
         if (this.startTime.after(endTime)) {
-            // todo - a) forbid b) set end to start + min event length c) exception
+            // todo - a) forbid + exception
             return;
         }
         this.endTime = endTime;
