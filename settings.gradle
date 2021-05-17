@@ -1,2 +1,2 @@
 rootProject.name = "PLANet"
-include ':library'
+include ':app'
