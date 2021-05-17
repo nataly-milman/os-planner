@@ -21,9 +21,9 @@ public class PlannerEvent {
 
     // constructors
     public PlannerEvent(String title, Date startTime, Date endTime) {
-        this.title = NO_TITLE;
+        this.title = title;
         if (title == null || title.isEmpty()) {
-            this.title = title;
+            this.title = NO_TITLE;
         }
         this.description = "";
         this.startTime = startTime;
