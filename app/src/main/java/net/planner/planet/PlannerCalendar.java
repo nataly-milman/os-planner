@@ -93,13 +93,13 @@ public class PlannerCalendar {
 
     // Helper functions
     private boolean isValidDate(Date date) {
-        long diffInMillis = startTime - date.getTime();
+        long diffInMillis = date.getTime() - startTime;
         return diffInMillis >= 0 &&
                 TimeUnit.DAYS.convert(diffInMillis, TimeUnit.MILLISECONDS) <= MAX_DAYS;
     }
 
     private int toSlotIndex(Date date) {
-        long diffInMillis = startTime - date.getTime();
+        long diffInMillis = date.getTime() - startTime;
         return (int) TimeUnit.MINUTES.convert(diffInMillis, TimeUnit.MILLISECONDS) / SLOT_SIZE;
     }
 
