@@ -1,8 +1,13 @@
 package net.planner.planet;
 
+import android.icu.util.DateInterval;
+
 import org.jetbrains.annotations.NotNull;
 
+import java.time.DateTimeException;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.Objects;
 
 
 public class PlannerEvent {
@@ -10,17 +15,17 @@ public class PlannerEvent {
     private static final String NO_TITLE = "(No title)";
     private String title;
     private String description;
-    private Date startTime;
-    private Date endTime;
+    private long startTime;
+    private long endTime;
+    private boolean exclusiveForItsTimeSlot;
 
     private String location; // string for now
-    // todo "private ??? repeat"; (repeat conditions, y/n)
     private int reminder; // N minutes before (or some set values as in GC)
     private int priority; //1-10
-    private String tag; // list of tags?
+    private PlannerTag tag;
 
     // constructors
-    public PlannerEvent(String title, Date startTime, Date endTime) {
+    public PlannerEvent(String title, long startTime, long endTime) {
         this.title = title;
         if (title == null || title.isEmpty()) {
             this.title = NO_TITLE;
@@ -31,7 +36,8 @@ public class PlannerEvent {
         this.location = ""; // for now string
         this.reminder = -1;
         this.priority = 5;
-        this.tag = "";  // for now string
+        this.tag = null;
+        this.exclusiveForItsTimeSlot = true;
     }
 
     // methods
@@ -55,26 +61,26 @@ public class PlannerEvent {
         this.description = description;
     }
 
-    public Date getStartTime() {
+    public long getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(Date startTime) {
-        long timeDiff = this.endTime.getTime() - this.startTime.getTime();
+    public void setStartTime(long startTime) {
+        if (startTime < 0) {
+            throw new IllegalArgumentException("Illegal start time: Time cannot be negative");
+        }
+        long duration = this.endTime - this.startTime;
         this.startTime = startTime;
-        Date endTime = (Date) startTime.clone();
-        endTime.setTime(startTime.getTime() + timeDiff);
-        this.endTime = endTime;
+        this.endTime = startTime + duration;
     }
 
-    public Date getEndTime() {
+    public long getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(Date endTime) {
-        if (this.startTime.after(endTime)) {
-            // todo - a) forbid + exception
-            return;
+    public void setEndTime(long endTime) {
+        if (this.startTime > endTime) {
+            throw new IllegalArgumentException("Illegal end time: Event cannot end before it starts");
         }
         this.endTime = endTime;
     }
@@ -105,17 +111,25 @@ public class PlannerEvent {
 
     public void setPriority(int priority) {
         if (priority < 1 || priority > 10) {
-            return;
+            throw new IllegalArgumentException("Illegal priority: Priority is integer from 1 to 10");
         }
         this.priority = priority;
     }
 
-    public String getTag() {
+    public PlannerTag getTag() {
         return tag;
     }
 
-    public void setTag(String tag) {
+    public void setTag(PlannerTag tag) {
         this.tag = tag;
+    }
+
+    public boolean isExclusiveForItsTimeSlot() {
+        return exclusiveForItsTimeSlot;
+    }
+
+    public void setExclusiveForItsTimeSlot(boolean exclusiveForItsTimeSlot) {
+        this.exclusiveForItsTimeSlot = exclusiveForItsTimeSlot;
     }
 
     @NotNull
@@ -125,7 +139,7 @@ public class PlannerEvent {
         if (!this.description.isEmpty()) {
             stringRep += "; Description: " + this.description;
         }
-        stringRep += "; Starts at " + this.startTime + "; Ends at " + this.endTime;
+        stringRep += "; Starts at " + new Date(this.startTime) + "; Ends at " + new Date(this.endTime);
         if (!this.location.isEmpty()) {
             stringRep += "; Located at: " + location;
         }
@@ -135,10 +149,34 @@ public class PlannerEvent {
         if (this.priority != -1) {
             stringRep += "; Priority: " + this.priority + "/10";
         }
-        if (!this.tag.isEmpty()) {
-            stringRep += "; Tagged: " + this.tag;
+        if (this.tag != null) {
+            stringRep += "; Tagged: " + this.tag.toString();
+        }
+        if (this.exclusiveForItsTimeSlot){
+            stringRep += "; Exclusive for this time slot";
+        } else {
+            stringRep += "; Not exclusive for this time slot";
         }
         return stringRep + ".";
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PlannerEvent)) return false;
+        PlannerEvent that = (PlannerEvent) o;
+        return reminder == that.reminder &&
+                priority == that.priority &&
+                title.equals(that.title) &&
+                description.equals(that.description) &&
+                startTime == that.startTime &&
+                endTime == that.endTime &&
+                location.equals(that.location) &&
+                tag.equals(that.tag);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(title, description, startTime, endTime, location, reminder, priority, tag);
+    }
 }
