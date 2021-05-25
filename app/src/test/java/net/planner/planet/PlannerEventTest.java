@@ -13,7 +13,7 @@ import java.util.Objects;
 public class PlannerEventTest {
 
     @Test
-    public void eventCreation(){
+    public void eventCreation() {
         SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd h:mm");
         Date date1 = null, date2 = null;
         try {
@@ -26,12 +26,13 @@ public class PlannerEventTest {
         assert date2 != null;
         PlannerEvent pe = new PlannerEvent("New event", date1.getTime(), date2.getTime());
         Assert.assertNotNull(pe);
-        Assert.assertEquals("Title: New event; Starts at Sun May 16 06:00:00 IDT 2021; " +
-                "Ends at Sun May 16 18:00:00 IDT 2021; Priority: 5/10; Exclusive for this time slot.", pe.toString());
+        Assert.assertEquals("Title: New event; Priority: 5/10; Exclusive for this time slot;" +
+                        " Starts at Sun May 16 06:00:00 IDT 2021; Ends at Sun May 16 18:00:00 IDT 2021.",
+                pe.toString());
     }
 
     @Test
-    public void testBasicValues(){
+    public void testBasicValues() {
         SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd h:mm");
         long date1 = 0, date2 = 0, date3 = 0;
         try {
@@ -48,7 +49,8 @@ public class PlannerEventTest {
         // check end
         try {
             pe.setEndTime(date3); // set end before start
-        } catch (IllegalArgumentException ignored) {}
+        } catch (IllegalArgumentException ignored) {
+        }
         Assert.assertFalse(pe.getEndTime() < pe.getStartTime());  // NOT end before start
         // reset to a valid config
         pe.setStartTime(date3);
@@ -64,12 +66,13 @@ public class PlannerEventTest {
         // priority
         try {
             pe.setPriority(0);
-        } catch (IllegalArgumentException ignored) {}
+        } catch (IllegalArgumentException ignored) {
+        }
         Assert.assertFalse(pe.getPriority() < 1);
     }
 
     @Test
-    public void moveTime(){
+    public void moveTime() {
         SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd h:mm");
         long date1 = 0, date2 = 0, newStart = 0, expectedEnd = 0;
         try {
@@ -86,7 +89,8 @@ public class PlannerEventTest {
 
         try {
             pe.setEndTime(date2);
-        } catch (IllegalArgumentException ignored) {}
+        } catch (IllegalArgumentException ignored) {
+        }
         Assert.assertNotEquals(pe.getEndTime(), date2); //can't set end before start
     }
 }

@@ -19,7 +19,7 @@ import static org.junit.Assert.*;
 public class PlannerTagTest {
 
     @Test
-    public void tagCreation(){
+    public void tagCreation() {
         PlannerTag tag = new PlannerTag("work");
         Assert.assertNotNull(tag);
         SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd h:mm");
@@ -39,11 +39,11 @@ public class PlannerTagTest {
         Assert.assertEquals(expected.size(), obtained.size());
 
         boolean found;
-        for (int i = 0; i<obtained.size(); i++){
+        for (int i = 0; i < obtained.size(); i++) {
             long[] interval = obtained.get(i);
             found = false;
-            for (int j = 0; j < expected.size(); j++){
-                if (expected.get(j)[0] == interval[0] && expected.get(j)[1] == interval[1]){
+            for (int j = 0; j < expected.size(); j++) {
+                if (expected.get(j)[0] == interval[0] && expected.get(j)[1] == interval[1]) {
                     found = true;
                 }
             }
