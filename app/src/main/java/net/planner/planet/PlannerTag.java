@@ -12,7 +12,7 @@ public class PlannerTag {
     private LinkedList<long[]> preferredTimeIntervals;
     private int priority;
 
-    public PlannerTag(String tagName){
+    public PlannerTag(String tagName) {
         this.tagName = tagName;
         this.forbiddenTimeIntervals = new LinkedList<>();
     }
@@ -31,7 +31,8 @@ public class PlannerTag {
 
     public void setPriority(int priority) {
         if (priority < 1 || priority > 10) {
-            throw new IllegalArgumentException("Illegal priority: Priority is integer from 1 to 10");
+            throw new IllegalArgumentException(
+                    "Illegal priority: Priority is integer from 1 to 10");
         }
         this.priority = priority;
     }
@@ -41,8 +42,9 @@ public class PlannerTag {
     }
 
     public void addForbiddenTimeInterval(long from, long until) {
-        if (until < from){
-            throw new IllegalArgumentException("Illegal time interval: Event cannot end before it starts");
+        if (until < from) {
+            throw new IllegalArgumentException(
+                    "Illegal time interval: Event cannot end before it starts");
         }
         this.forbiddenTimeIntervals.add(new long[]{from, until});
     }
@@ -52,8 +54,9 @@ public class PlannerTag {
     }
 
     public void addPreferredTimeInterval(long from, long until) {
-        if (until < from){
-            throw new IllegalArgumentException("Illegal time interval: Event cannot end before it starts");
+        if (until < from) {
+            throw new IllegalArgumentException(
+                    "Illegal time interval: Event cannot end before it starts");
         }
         this.preferredTimeIntervals.add(new long[]{from, until});
     }
