@@ -3,6 +3,7 @@ package net.planner.planet;
 import android.icu.util.DateInterval;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.DateTimeException;
 import java.util.Calendar;
@@ -13,6 +14,8 @@ import java.util.Objects;
 public class PlannerEvent extends PlannerObject {
     private long startTime;
     private long endTime;
+    private long eventId;
+    private boolean isAllDay;
 
     // constructors
     public PlannerEvent(String title, long startTime, long endTime) {
@@ -20,6 +23,8 @@ public class PlannerEvent extends PlannerObject {
         this.title = title;
         this.startTime = startTime;
         this.endTime = endTime;
+        this.eventId = -1L;
+        this.isAllDay = false; // @TODO check duration?
     }
 
     // methods
@@ -46,6 +51,14 @@ public class PlannerEvent extends PlannerObject {
                     "Illegal end time: Event cannot end before it starts");
         }
         this.endTime = endTime;
+    }
+
+    public void setEventId(long eventId) {
+        this.eventId = eventId;
+    }
+
+    public void setAllDay(boolean isAllDay) {
+        this.isAllDay = isAllDay;
     }
 
 

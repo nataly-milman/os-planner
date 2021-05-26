@@ -107,11 +107,11 @@ class GoogleCalenderCommunicator : ActivityCompat.OnRequestPermissionsResultCall
 
 
     private fun insertEvent(contentResolver: ContentResolver, calenderId : Long, insertedEvent: PlannerEvent, timezone: String? = null) : Long {
-        val startMillis = insertedEvent.startTime.time
-        val endMillis = insertedEvent.endTime.time
+        val startMillis = insertedEvent.startTime
+        val endMillis = insertedEvent.endTime
         val eventTitle = insertedEvent.title
         val eventDescription = insertedEvent.description
-//        val calenderId = insertedEvent.calenderId
+
         val values = ContentValues().apply {
             put(CalendarContract.Events.DTSTART, startMillis)
             put(CalendarContract.Events.DTEND, endMillis)
@@ -121,7 +121,6 @@ class GoogleCalenderCommunicator : ActivityCompat.OnRequestPermissionsResultCall
             put(CalendarContract.Events.EVENT_TIMEZONE, timezone ?: TimeZone.getDefault().displayName)
         }
         val uri: Uri? = contentResolver.insert(CalendarContract.Events.CONTENT_URI, values)
-        // @TODO find out how to get confirmation since this is async probably relates to https://developer.android.com/reference/android/content/AsyncQueryHandler
 
         // get the event ID that is the last element in the Uri
         val eventID: Long = uri?.let {
@@ -194,9 +193,12 @@ class GoogleCalenderCommunicator : ActivityCompat.OnRequestPermissionsResultCall
                 val color: Int = eventsCur.getInt(PROJECTION_DISPLAY_COLOR_INDEX)
 
                 Log.d(TAG, "getCalendarEvents: found event with id $id, titled ${title} with description: ${description} is all day? $allDay can be scheduled over? $availability, in location $location  with color: $color from calendar: $calenderId ")
-                val event = PlannerEvent(title,  Date(startDate.timeInMillis), Date(endDate.timeInMillis))
-
-                // @TODO add the necessary fields retrieved from Events
+                val event = PlannerEvent(title,  startDate.timeInMillis, endDate.timeInMillis)
+                event.setLocation(location)
+                event.setTag(PlannerTag(color.toString()))
+                event.exclusiveForItsTimeSlot = CalendarContract.Events.AVAILABILITY_BUSY != 0
+                event.setEventId(id)
+                event.setAllDay(allDay == 1)
 
                 events.add(event)
             }
