@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 
 
-class GoogleCalenderCommunicator : ActivityCompat.OnRequestPermissionsResultCallback {
+class GoogleCalenderCommunicator {
 
     private val TAG = "GoogleCalenderCommunicator"
     private val ONE_MONTH_MILLIS = TimeUnit.DAYS.toMillis(30)
@@ -106,7 +106,8 @@ class GoogleCalenderCommunicator : ActivityCompat.OnRequestPermissionsResultCall
     }
 
 
-    private fun insertEvent(contentResolver: ContentResolver, calenderId : Long, insertedEvent: PlannerEvent, timezone: String? = null) : Long {
+    fun insertEvent(contentResolver: ContentResolver?, insertedEvent: PlannerEvent,
+                    calenderId : Long = mainCalendarID, timezone: String? = null) : Long {
         val startMillis = insertedEvent.startTime
         val endMillis = insertedEvent.endTime
         val eventTitle = insertedEvent.title
@@ -120,7 +121,7 @@ class GoogleCalenderCommunicator : ActivityCompat.OnRequestPermissionsResultCall
             put(CalendarContract.Events.CALENDAR_ID, calenderId)
             put(CalendarContract.Events.EVENT_TIMEZONE, timezone ?: TimeZone.getDefault().displayName)
         }
-        val uri: Uri? = contentResolver.insert(CalendarContract.Events.CONTENT_URI, values)
+        val uri: Uri? = contentResolver?.insert(CalendarContract.Events.CONTENT_URI, values)
 
         // get the event ID that is the last element in the Uri
         val eventID: Long = uri?.let {
@@ -199,6 +200,7 @@ class GoogleCalenderCommunicator : ActivityCompat.OnRequestPermissionsResultCall
                 event.exclusiveForItsTimeSlot = CalendarContract.Events.AVAILABILITY_BUSY != 0
                 event.setEventId(id)
                 event.setAllDay(allDay == 1)
+                event.setDescription(description)
 
                 events.add(event)
             }
@@ -284,8 +286,4 @@ class GoogleCalenderCommunicator : ActivityCompat.OnRequestPermissionsResultCall
         return false
     }
 
-    // @TODO Either we implement this here was some kind of object that remembers the call to the function, or the caller needs to implements this to remember to call again
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        Log.d(TAG, "Permissions granted")
-    }
 }
