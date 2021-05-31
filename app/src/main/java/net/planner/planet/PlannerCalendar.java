@@ -56,14 +56,14 @@ public class PlannerCalendar {
     }
 
     // Methods
-    public Collection<?> getCollisions(Date startDate, Date endDate) {
+    public Collection<?> getCollisions(long startDate, long endDate) {
         int startSlot = toSlotIndex(startDate);
         int endSlot = toSlotIndex(endDate);
 
         return thisMonth.find(new IntegerInterval(startSlot, endSlot));
     }
 
-    public boolean isAvailable(Date startDate, Date endDate) {
+    public boolean isAvailable(long startDate, long endDate) {
         return getCollisions(startDate, endDate).isEmpty();
     }
 
@@ -85,6 +85,16 @@ public class PlannerCalendar {
         return thisMonth.add(toInsert);
     }
 
+    public boolean insertTask(PlannerTask task) {
+        // todo implement
+        return false;
+    }
+
+    public boolean forceInsertTask(PlannerTask task) {
+        // todo implement
+        return false;
+    }
+
     public boolean removeEvent(PlannerEvent event) {
         PlannerInterval toRemove = new PlannerInterval(event);
         // todo current implementation only checks interval but can't actually compare events
@@ -92,14 +102,14 @@ public class PlannerCalendar {
     }
 
     // Helper functions
-    private boolean isValidDate(Date date) {
-        long diffInMillis = date.getTime() - startTime;
+    private boolean isValidDate(long time) {
+        long diffInMillis = time - startTime;
         return diffInMillis >= 0 &&
                 TimeUnit.DAYS.convert(diffInMillis, TimeUnit.MILLISECONDS) <= MAX_DAYS;
     }
 
-    private int toSlotIndex(Date date) {
-        long diffInMillis = date.getTime() - startTime;
+    private int toSlotIndex(long time) {
+        long diffInMillis = time - startTime;
         return (int) TimeUnit.MINUTES.convert(diffInMillis, TimeUnit.MILLISECONDS) / SLOT_SIZE;
     }
 
