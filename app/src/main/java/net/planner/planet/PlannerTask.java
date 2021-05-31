@@ -9,9 +9,10 @@ public class PlannerTask extends PlannerObject {
     private long deadline;
     private int maxSessionTimeInMinutes;
     private int maxDivisionsNumber;
+    private long duration;
     private int durationInMinutes;
 
-    public PlannerTask(String title, long deadline, int durationInMinutes) {
+    public PlannerTask(String title, long deadline, long duration) {
         super(title);
         if (deadline < 0) {
             throw new IllegalArgumentException("Invalid deadline");
@@ -22,7 +23,7 @@ public class PlannerTask extends PlannerObject {
         this.deadline = deadline;
         this.maxSessionTimeInMinutes = 24 * 60; //1 day as a default
         this.maxDivisionsNumber = 1; // in one go as a default
-        this.durationInMinutes = durationInMinutes;
+        this.duration = duration;
     }
 
 
@@ -64,7 +65,8 @@ public class PlannerTask extends PlannerObject {
         String stringRep = super.toString();
         stringRep += "; Deadline is " + new Date(this.deadline) +
                 "; Maximal time of one session (if divided) is " + maxSessionTimeInMinutes +
-                "; Maximal number of divisions (if divided) is " + maxDivisionsNumber;
+                "; Maximal number of divisions (if divided) is " + maxDivisionsNumber +
+                " Expected duration of the task in milliseconds is: " + duration;
         return stringRep + ".";
     }
 
@@ -82,12 +84,14 @@ public class PlannerTask extends PlannerObject {
         PlannerTask that = (PlannerTask) o;
         return getDeadline() == that.getDeadline() &&
                 getMaxSessionTimeInMinutes() == that.getMaxSessionTimeInMinutes() &&
+                getDuration() == that.getDuration() &&
+                getMaxSessionTime() == that.getMaxSessionTime() &&
                 getMaxDivisionsNumber() == that.getMaxDivisionsNumber();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), getDeadline(), getMaxSessionTimeInMinutes(),
+        return Objects.hash(super.hashCode(), getDuration(), getDeadline(), getMaxSessionTime(),
                 getMaxDivisionsNumber());
     }
 }
