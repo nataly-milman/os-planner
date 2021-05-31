@@ -15,6 +15,7 @@ public class PlannerTag {
     public PlannerTag(String tagName) {
         this.tagName = tagName;
         this.forbiddenTimeIntervals = new LinkedList<>();
+        this.preferredTimeIntervals = new LinkedList<>();
     }
 
     public String getTagName() {
@@ -58,6 +59,7 @@ public class PlannerTag {
             throw new IllegalArgumentException(
                     "Illegal time interval: Event cannot end before it starts");
         }
-        this.preferredTimeIntervals.add(new long[]{from, until});
+        long[] interval = new long[]{from, until};
+        this.preferredTimeIntervals.add(interval);
     }
 }

@@ -9,8 +9,7 @@ public class PlannerTask extends PlannerObject {
     private long deadline;
     private int maxSessionTimeInMinutes;
     private int maxDivisionsNumber;
-    private long duration;
-    private int durationInMinutes;
+    private long durationInMinutes;
 
     public PlannerTask(String title, long deadline, long duration) {
         super(title);
@@ -23,7 +22,7 @@ public class PlannerTask extends PlannerObject {
         this.deadline = deadline;
         this.maxSessionTimeInMinutes = 24 * 60; //1 day as a default
         this.maxDivisionsNumber = 1; // in one go as a default
-        this.duration = duration;
+        this.durationInMinutes = duration;
     }
 
 
@@ -51,7 +50,7 @@ public class PlannerTask extends PlannerObject {
         this.maxDivisionsNumber = maxDivisionsNumber;
     }
 
-    public int getDurationInMinutes() {
+    public long getDurationInMinutes() {
         return durationInMinutes;
     }
 
@@ -66,7 +65,7 @@ public class PlannerTask extends PlannerObject {
         stringRep += "; Deadline is " + new Date(this.deadline) +
                 "; Maximal time of one session (if divided) is " + maxSessionTimeInMinutes +
                 "; Maximal number of divisions (if divided) is " + maxDivisionsNumber +
-                " Expected duration of the task in milliseconds is: " + duration;
+                " Expected duration of the task in milliseconds is: " + durationInMinutes;
         return stringRep + ".";
     }
 
@@ -84,14 +83,14 @@ public class PlannerTask extends PlannerObject {
         PlannerTask that = (PlannerTask) o;
         return getDeadline() == that.getDeadline() &&
                 getMaxSessionTimeInMinutes() == that.getMaxSessionTimeInMinutes() &&
-                getDuration() == that.getDuration() &&
-                getMaxSessionTime() == that.getMaxSessionTime() &&
+                getDurationInMinutes() == that.getDurationInMinutes() &&
                 getMaxDivisionsNumber() == that.getMaxDivisionsNumber();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), getDuration(), getDeadline(), getMaxSessionTime(),
+        return Objects.hash(super.hashCode(), getDurationInMinutes(), getDeadline(),
+                getMaxSessionTimeInMinutes(),
                 getMaxDivisionsNumber());
     }
 }
