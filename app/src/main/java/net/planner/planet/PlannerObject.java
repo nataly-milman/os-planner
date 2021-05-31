@@ -14,7 +14,7 @@ abstract class PlannerObject {
     protected String location; // string for now
     protected int reminder; // N minutes before (or some set values as in GC)
     protected int priority; //1-10
-    protected PlannerTag tag;
+    protected String tag;
 
     //constructors
     protected PlannerObject(String title) {
@@ -27,7 +27,7 @@ abstract class PlannerObject {
         this.location = ""; // for now string
         this.reminder = -1;
         this.priority = 5;
-        this.tag = null;
+        this.tag = "NoTag";
         this.exclusiveForItsTimeSlot = true;
     }
 
@@ -84,11 +84,11 @@ abstract class PlannerObject {
         this.priority = priority;
     }
 
-    public PlannerTag getTag() {
+    public String getTagName() {
         return tag;
     }
 
-    public void setTag(PlannerTag tag) {
+    public void setTagName(String tag) {
         this.tag = tag;
     }
 
@@ -117,7 +117,7 @@ abstract class PlannerObject {
             stringRep += "; Priority: " + this.priority + "/10";
         }
         if (this.tag != null) {
-            stringRep += "; Tagged: " + this.tag.toString();
+            stringRep += "; Tagged: " + this.tag;
         }
         if (this.exclusiveForItsTimeSlot) {
             stringRep += "; Exclusive for this time slot";
@@ -140,13 +140,13 @@ abstract class PlannerObject {
                 getReminder() == that.getReminder() && getPriority() == that.getPriority() &&
                 getTitle().equals(that.getTitle()) &&
                 getDescription().equals(that.getDescription()) &&
-                getLocation().equals(that.getLocation()) && getTag().equals(that.getTag());
+                getLocation().equals(that.getLocation()) && getTagName().equals(that.getTagName());
     }
 
     @Override
     public int hashCode() {
         return Objects
                 .hash(getTitle(), getDescription(), isExclusiveForItsTimeSlot(), getLocation(),
-                        getReminder(), getPriority(), getTag());
+                        getReminder(), getPriority(), getTagName());
     }
 }

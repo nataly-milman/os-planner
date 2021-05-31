@@ -1,6 +1,7 @@
 package net.planner.planet
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ContentResolver
 import android.content.ContentUris
@@ -141,6 +142,7 @@ class GoogleCalenderCommunicator {
 //    }
 
 
+    @SuppressLint("SimpleDateFormat")
     private fun getCalendarEvents(contentResolver: ContentResolver, calenderId: Long, startMillis: Long, endMillis: Long) : MutableCollection<PlannerEvent> {
         // Getting events process:
         // 1. Get the event information from the Events table.
@@ -196,7 +198,7 @@ class GoogleCalenderCommunicator {
                 Log.d(TAG, "getCalendarEvents: found event with id $id, titled ${title} with description: ${description} is all day? $allDay can be scheduled over? $availability, in location $location  with color: $color from calendar: $calenderId ")
                 val event = PlannerEvent(title,  startDate.timeInMillis, endDate.timeInMillis)
                 event.setLocation(location)
-                event.setTag(PlannerTag(color.toString()))
+                event.tagName = color.toString()
                 event.exclusiveForItsTimeSlot = CalendarContract.Events.AVAILABILITY_BUSY != 0
                 event.setEventId(id)
                 event.setAllDay(allDay == 1)

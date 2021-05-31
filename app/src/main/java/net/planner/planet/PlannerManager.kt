@@ -14,6 +14,8 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?) : Activit
     private var shouldSync: Boolean
     private var communicator: GoogleCalenderCommunicator? = null
     private val callerActivity: Activity?
+    @SuppressLint("SimpleDateFormat")
+    private val formatter = SimpleDateFormat("H:mm MM/dd/yyyy")
 
     init {
         calendar = PlannerCalendar()
@@ -47,18 +49,36 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?) : Activit
         }
     }
 
+    @SuppressLint("SimpleDateFormat")
     @JvmOverloads
-    fun addEvent(startTime: Long, endTime: Long, title: String = "",
+    fun addEvent(title: String = "", startTime: Long, endTime: Long,
                  isAllDay : Boolean = false, canBeScheduledOver : Boolean = true,
                  description: String = "", location: String = "", tag: String = "NoTag") {
-        // todo if tag is not NoTag and not in the calendar, return exception
-        val event = PlannerEvent(title,  startTime, endTime)
+        if (tag != "NoTag" && !calendar.containsTag(tag)){
+            throw IllegalArgumentException(
+                "This tag doesn't exist"
+            )
+        }
+        val event = PlannerEvent(title, startTime, endTime)
         event.setLocation(location)
-        event.setTag(PlannerTag(tag))
-        event.setExclusiveForItsTimeSlot(canBeScheduledOver)
+        event.tagName = tag
+        event.isExclusiveForItsTimeSlot = canBeScheduledOver
         event.setAllDay(isAllDay)
+
         event.setDescription(description)
         calendar.insertEvent(event)
+
+        if (isAllDay){
+            var date = (Calendar.getInstance().apply { timeInMillis = startTime })
+            val newStartDate = SimpleDateFormat("MM/dd/yyyy").format(date.time)
+            event.startTime = formatter.parse("0:0 $newStartDate").time
+
+            date = (Calendar.getInstance().apply {
+                timeInMillis = startTime
+            })
+            val newEndDate = SimpleDateFormat("MM/dd/yyyy").format(date.time)
+            event.endTime = formatter.parse("23:59 $newEndDate").time
+        }
 
         // If this is a synced calendar, should be added to the users google calendar
         if (this.shouldSync) {
@@ -72,11 +92,15 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?) : Activit
     @JvmOverloads
     fun addTask(title: String, deadlineTimeMillis: Long, durationInMinutes: Int, tag: String = "NoTag",
                 priority: Int = 9, location: String = "") {
-        // todo if tag is not NoTag and not in the calendar, return exception
+        if (tag != "NoTag" && !calendar.containsTag(tag)){
+            throw IllegalArgumentException(
+                "This tag doesn't exist"
+            )
+        }
         val task = PlannerTask(title, deadlineTimeMillis, durationInMinutes)
         task.setPriority(priority)
         task.setLocation(location)
-        task.setTag(PlannerTag(tag))
+        task.tagName = tag
         calendar.insertTask(task)
         // @TODO add actions to calculate task subtask events
     }
@@ -84,10 +108,7 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?) : Activit
     @SuppressLint("SimpleDateFormat")
     private fun turnTimesIntoDates(timeIntervals: List<Pair<Pair<Int, Int>, Pair<Int, Int>>>?): List<Pair<Long, Long>> {
         val dateIntervals = mutableListOf<Pair<Long, Long>>()
-        val formatter = SimpleDateFormat("h:m MM/dd/yyyy")
-        val startDateD = (Calendar.getInstance().apply {
-            timeInMillis = calendar.startTime
-        })
+        val startDateD = (Calendar.getInstance().apply { timeInMillis = calendar.startTime })
 
         if (timeIntervals != null) {
             for (pair in timeIntervals) {
@@ -97,8 +118,8 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?) : Activit
                 val endMin = pair.second.second.toString()
                 for (i in 0..30) {
                     val startDate = SimpleDateFormat("MM/dd/yyyy").format(startDateD.time)
-                    val start = formatter.parse(startHour + ":" + startMin + " " + startDate).time
-                    val end = formatter.parse(endHour + ":" + endMin + " " + startDate).time
+                    val start = formatter.parse("$startHour:$startMin $startDate").time
+                    val end = formatter.parse("$endHour:$endMin $startDate").time
                     dateIntervals.add(Pair(start, end))
                     startDateD.add(Calendar.DAY_OF_YEAR, 1)
                 }
@@ -118,8 +139,10 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?) : Activit
         for (pair in turnTimesIntoDates(preferredTimeIntervals)){
             tag.addPreferredTimeInterval(pair.first, pair.second)
         }
-        // @TODO add to calendar - if it's in, rewrite if not - add
-
+        if (calendar.containsTag(title)){
+            calendar.removeTag(title)
+        }
+        calendar.addTag(tag)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
