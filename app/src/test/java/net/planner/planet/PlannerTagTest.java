@@ -2,6 +2,9 @@ package net.planner.planet;
 
 import android.util.Pair;
 
+import com.brein.time.timeintervals.intervals.IInterval;
+import com.brein.time.timeintervals.intervals.LongInterval;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -31,19 +34,19 @@ public class PlannerTagTest {
             e.printStackTrace();
         }
         tag.addForbiddenTimeInterval(date1, date2);
-        LinkedList<long[]> expected = new LinkedList<>();
-        expected.add(new long[]{date1, date2});
+        List<IInterval> expected = new LinkedList<>();
+        expected.add(new LongInterval(date1, date2));
 
-        LinkedList<long[]> obtained = tag.getForbiddenTimeIntervals();
+        List<IInterval> obtained = tag.getForbiddenTimeIntervals();
 
         Assert.assertEquals(expected.size(), obtained.size());
 
         boolean found;
         for (int i = 0; i < obtained.size(); i++) {
-            long[] interval = obtained.get(i);
+            IInterval interval = obtained.get(i);
             found = false;
             for (int j = 0; j < expected.size(); j++) {
-                if (expected.get(j)[0] == interval[0] && expected.get(j)[1] == interval[1]) {
+                if (interval.equals(expected.get(j))) {
                     found = true;
                 }
             }
