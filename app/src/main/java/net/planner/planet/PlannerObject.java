@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Date;
 import java.util.Objects;
 
-public class PlannerObject {
+abstract class PlannerObject {
     protected static final String NO_TITLE = "(No title)";
     protected String title;
     protected String description;
@@ -17,7 +17,7 @@ public class PlannerObject {
     protected PlannerTag tag;
 
     //constructors
-    public PlannerObject(String title) {
+    protected PlannerObject(String title) {
         super();
         this.title = title;
         if (title == null || title.isEmpty()) {

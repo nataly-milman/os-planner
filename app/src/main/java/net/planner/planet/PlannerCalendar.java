@@ -169,6 +169,16 @@ public class PlannerCalendar {
                 TimeUnit.DAYS.convert(diffInMillis, TimeUnit.MILLISECONDS) <= MAX_DAYS;
     }
 
+
+    private int toSlotIndex(long time) {
+        long diffInMillis = time - startTime;
+        return (int) TimeUnit.MINUTES.convert(diffInMillis, TimeUnit.MILLISECONDS) / SLOT_SIZE;
+    }
+
+    public long getStartTime() {
+        return startTime;
+    }
+
     // Inner classes
     private class OccupiedInterval extends NumberInterval<Long> {
 
