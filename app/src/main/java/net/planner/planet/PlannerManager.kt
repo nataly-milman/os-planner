@@ -72,7 +72,7 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?) : Activit
         task.setPriority(priority)
         task.setLocation(location)
         task.setTag(PlannerTag(tag))
-        calendar.addTask(task)
+        calendar.insertTask(task)
         // @TODO add actions to calculate task subtask events
     }
 
