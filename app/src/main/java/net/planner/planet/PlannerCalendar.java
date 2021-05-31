@@ -113,6 +113,10 @@ public class PlannerCalendar {
         return (int) TimeUnit.MINUTES.convert(diffInMillis, TimeUnit.MILLISECONDS) / SLOT_SIZE;
     }
 
+    public long getStartTime() {
+        return startTime;
+    }
+
     // Inner classes
     private class PlannerInterval extends NumberInterval<Integer> {
 
