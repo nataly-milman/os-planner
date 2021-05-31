@@ -18,8 +18,24 @@
 ## How to use the library?
 The current upload format for this repository currently requires you to pull the repository into Android Studio and compile from there, though you are also welcome to take whichever files you want from this project and to add them to your code in any way you like :)
 
-The recommended way to interface with this library is through the PlannerManager class and its API.
-You can also manually use the rest of the Planner- prefixed classes for manual usage of the library.
+Steps:
+1. Clone git repo.
+2. Run the library and copy the created aar file from the generated folder.
+3. Paste the aar file into libs folder of your app.
+4. Add the following line to your module's gradle file:
+   In dependencies : implementation(name: 'library-debug', ext: 'aar')
+   In repositories : flatDir {
+                             dirs 'libs'
+                         }
+5. Add the following permissions to your AndroidManifest:
+    <uses-permission android:name="android.permission.READ_CALENDAR" />
+    <uses-permission android:name="android.permission.WRITE_CALENDAR" />
+
+To add a new calendar just use our preCreated PlannerManager, which can be synced with
+google calendar automatically, or insert events manually, as specified during creation.
+
+To add a new task and watch our sub task creation algorithm at play, use PlannerManager's addTask,
+and specify the task's deadline and expected duration it will take to complete in milliseconds.
 
 ## Regarding pull requests
 Any pull requests to the library will be reviewed by all main authors of this library and the request will only be accepted if approved by all three.
