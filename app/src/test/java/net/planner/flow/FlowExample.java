@@ -33,6 +33,9 @@ public class FlowExample {
                 List.of(new Pair<>(new Pair<>(17, 0), new Pair<>(22, 30)));
         manager.addOrEditTag("sport", null, preferredTI, 8);
 
+        long deadline = Objects.requireNonNull(ft.parse("2021-05-16 23:30")).getTime();
+        manager.addTask("Yoga", deadline, 45,  "sport", 5);
+
 
     }
 

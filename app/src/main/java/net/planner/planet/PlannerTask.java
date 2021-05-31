@@ -9,9 +9,9 @@ public class PlannerTask extends PlannerObject {
     private long deadline;
     private int maxSessionTimeInMinutes;
     private int maxDivisionsNumber;
-    private long durationInMinutes;
+    private int durationInMinutes;
 
-    public PlannerTask(String title, long deadline, long duration) {
+    public PlannerTask(String title, long deadline, int durationInMinutes) {
         super(title);
         if (deadline < 0) {
             throw new IllegalArgumentException("Invalid deadline");
@@ -22,7 +22,7 @@ public class PlannerTask extends PlannerObject {
         this.deadline = deadline;
         this.maxSessionTimeInMinutes = 24 * 60; //1 day as a default
         this.maxDivisionsNumber = 1; // in one go as a default
-        this.durationInMinutes = duration;
+        this.durationInMinutes = durationInMinutes;
     }
 
 

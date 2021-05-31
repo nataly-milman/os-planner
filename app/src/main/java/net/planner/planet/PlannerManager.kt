@@ -70,10 +70,10 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?) : Activit
     }
 
     @JvmOverloads
-    fun addTask(deadlineTimeMillis: Long, durationMillis: Long, title: String,
-                priority: Int = 9, location: String = "", tag: String = "NoTag") {
+    fun addTask(title: String, deadlineTimeMillis: Long, durationInMinutes: Int, tag: String = "NoTag",
+                priority: Int = 9, location: String = "") {
         // todo if tag is not NoTag and not in the calendar, return exception
-        val task = PlannerTask(title, deadlineTimeMillis, durationMillis)
+        val task = PlannerTask(title, deadlineTimeMillis, durationInMinutes)
         task.setPriority(priority)
         task.setLocation(location)
         task.setTag(PlannerTag(tag))
