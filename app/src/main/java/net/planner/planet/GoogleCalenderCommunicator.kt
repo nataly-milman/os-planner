@@ -225,7 +225,7 @@ class GoogleCalenderCommunicator {
 
         val allEvents = mutableListOf<PlannerEvent>()
         val strongStartMillis = startMillis ?: System.currentTimeMillis()
-        val strongEndMillis = endMillis ?: System.currentTimeMillis() + ONE_MONTH_MILLIS
+        val strongEndMillis = endMillis ?: strongStartMillis + ONE_MONTH_MILLIS
 
         if (calenderIds.isNotEmpty()) {
             for (id in calenderIds ) {

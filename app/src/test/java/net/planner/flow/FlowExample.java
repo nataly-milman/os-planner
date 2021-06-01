@@ -15,9 +15,10 @@ public class FlowExample {
 
     @Test
     public void noGoogleCalendarFlow() throws ParseException {
-        PlannerManager manager = new PlannerManager(false, null);
-
         SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd H:mm");
+        long calendarTestFrom = Objects.requireNonNull(ft.parse("2021-05-13 0:00")).getTime();
+        PlannerManager manager = new PlannerManager(false, null, calendarTestFrom);
+
         // all day event for two days, start and end time wouldn't matter
         long start = Objects.requireNonNull(ft.parse("2021-05-13 14:00")).getTime();
         long end = Objects.requireNonNull(ft.parse("2021-05-14 12:00")).getTime();
@@ -47,3 +48,5 @@ public class FlowExample {
     }
 
 }
+
+

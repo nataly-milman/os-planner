@@ -7,18 +7,23 @@ import androidx.core.app.ActivityCompat
 import java.text.SimpleDateFormat
 import java.util.*
 
-class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?) : ActivityCompat.OnRequestPermissionsResultCallback  {
+class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?, startingFrom: Long?) : ActivityCompat.OnRequestPermissionsResultCallback  {
     private val TAG = "PlannerManager"
 
     private val calendar: PlannerCalendar
     private var shouldSync: Boolean
     private var communicator: GoogleCalenderCommunicator? = null
     private val callerActivity: Activity?
+    private val calendarStartTime: Long = startingFrom ?: System.currentTimeMillis()
+
     @SuppressLint("SimpleDateFormat")
     private val formatter = SimpleDateFormat("H:mm MM/dd/yyyy")
-
     init {
-        calendar = PlannerCalendar()
+        if (calendarStartTime < 0){
+            throw IllegalArgumentException("Error setting up user calendar - invalid start datetime, cannot be before " +
+                    "Thu Jan 01, 1970")
+        }
+        calendar = PlannerCalendar(calendarStartTime)
         shouldSync = syncGoogleCalendar
         callerActivity = activity
 
@@ -40,7 +45,7 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?) : Activit
 
     private fun addEventsToCalendar() {
         val strongActivity: Activity = callerActivity ?: return
-        val events = communicator?.getUserEvents(strongActivity)
+        val events = communicator?.getUserEvents(strongActivity, calendarStartTime)
         if (events != null) {
             // Will reach only if user already gave us permissions
             for (event in events) {
@@ -66,7 +71,6 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?) : Activit
         event.setAllDay(isAllDay)
 
         event.setDescription(description)
-        calendar.insertEvent(event)
 
         if (isAllDay){
             var date = (Calendar.getInstance().apply { timeInMillis = startTime })
@@ -80,6 +84,7 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?) : Activit
             event.endTime = formatter.parse("23:59 $newEndDate").time
         }
 
+        calendar.insertEvent(event)
         // If this is a synced calendar, should be added to the users google calendar
         if (this.shouldSync) {
             Log.d(TAG, "addEvent: Adding created event to google calendar, default calendar")
@@ -108,7 +113,7 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?) : Activit
     @SuppressLint("SimpleDateFormat")
     private fun turnTimesIntoDates(timeIntervals: List<Pair<Pair<Int, Int>, Pair<Int, Int>>>?): List<Pair<Long, Long>> {
         val dateIntervals = mutableListOf<Pair<Long, Long>>()
-        val startDateD = (Calendar.getInstance().apply { timeInMillis = calendar.startTime })
+        val startDateD = (Calendar.getInstance().apply { timeInMillis = calendarStartTime })
 
         if (timeIntervals != null) {
             for (pair in timeIntervals) {

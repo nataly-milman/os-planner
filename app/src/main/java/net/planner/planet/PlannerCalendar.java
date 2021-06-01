@@ -4,6 +4,8 @@ import com.brein.time.exceptions.IllegalTimeInterval;
 import com.brein.time.exceptions.IllegalTimePoint;
 import com.brein.time.timeintervals.indexes.IntervalTree;
 import com.brein.time.timeintervals.indexes.IntervalTreeBuilder;
+import com.brein.time.timeintervals.indexes.IntervalTreeNode;
+import com.brein.time.timeintervals.intervals.IInterval;
 import com.brein.time.timeintervals.intervals.LongInterval;
 import com.brein.time.timeintervals.intervals.NumberInterval;
 
@@ -11,8 +13,12 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
+
+import kotlin.Pair;
 
 public class PlannerCalendar {
 
@@ -22,7 +28,7 @@ public class PlannerCalendar {
 
     // Fields
     private long startTime; // This calendar starts from this time (ms) and ends 30 days after it.
-    private IntervalTree thisMonth;
+    private CalendarIntervalTree thisMonth;
     private HashMap<String, PlannerTag> tags;
 
     // Constructors
@@ -64,8 +70,8 @@ public class PlannerCalendar {
         }
 
         // Create occupiedTree and add events.
-        thisMonth = IntervalTreeBuilder.newBuilder()
-                .usePredefinedType(IntervalTreeBuilder.IntervalType.LONG).build();
+        thisMonth = (CalendarIntervalTree) IntervalTreeBuilder.newBuilder()
+                                                              .usePredefinedType(IntervalTreeBuilder.IntervalType.LONG).build();
         for (PlannerEvent event : eventList) {
             insertEvent(event);
         }
@@ -104,7 +110,11 @@ public class PlannerCalendar {
         }
 
         OccupiedInterval toInsert = new OccupiedInterval(event);
-        return !thisMonth.contains(toInsert) && thisMonth.add(toInsert);
+        boolean result =!thisMonth.contains(toInsert) && thisMonth.add(toInsert);
+        if (result && !thisMonth.isBalanced()){
+            thisMonth.balance();
+        }
+        return result;
     }
 
     public boolean forceInsertEvent(PlannerEvent event) {
@@ -113,11 +123,23 @@ public class PlannerCalendar {
         }
 
         OccupiedInterval toInsert = new OccupiedInterval(event);
-        return thisMonth.add(toInsert);
+        boolean result = thisMonth.add(toInsert);
+        if (result && !thisMonth.isBalanced()){
+            thisMonth.balance();
+        }
+        return result;
     }
 
     public boolean insertTask(PlannerTask task) {
         // todo implement
+        long startTaskTime = this.startTime;
+        long endTaskTime = startTaskTime + task.getDurationInMilliseconds();
+        Iterator<IInterval> it = thisMonth.iterator();
+        while (it.hasNext()) {
+            IInterval busyInterval = it.next();
+            System.out.println(busyInterval.getNormStart());
+            return false;
+        }
         return false;
     }
 
@@ -175,10 +197,6 @@ public class PlannerCalendar {
         return (int) TimeUnit.MINUTES.convert(diffInMillis, TimeUnit.MILLISECONDS) / SLOT_SIZE;
     }
 
-    public long getStartTime() {
-        return startTime;
-    }
-
     // Inner classes
     private class OccupiedInterval extends NumberInterval<Long> {
 
@@ -206,6 +224,48 @@ public class PlannerCalendar {
             if (!super.equals(o)) return false;
             OccupiedInterval that = (OccupiedInterval) o;
             return object.equals(that.object);
+        }
+    }
+
+    private class CalendarIntervalTree extends IntervalTree {
+        @Override
+        public Iterator<IInterval> iterator() {
+            final Iterator<IntervalTreeNode> outerNodeIt = nodeIterator();
+
+            return new Iterator<IInterval>() {
+                private Iterator<IInterval> nodeCollectionIt = null;
+                private IInterval next = findNext();
+
+                @Override
+                public boolean hasNext() {
+                    return this.next != null;
+                }
+
+                protected IInterval findNext() {
+                    if (this.nodeCollectionIt != null && this.nodeCollectionIt.hasNext()) {
+                        // nothing to do, next will return something
+                    } else if (outerNodeIt.hasNext()) {
+                        this.nodeCollectionIt = outerNodeIt.next().iterator();
+                    } else {
+                        return null;
+                    }
+
+                    return this.nodeCollectionIt.next();
+                }
+
+                @Override
+                public IInterval next() {
+                    if (!hasNext()) {
+                        throw new NoSuchElementException();
+                    }
+
+                    final IInterval result = this.next;
+                    this.next = findNext();
+
+                    return result;
+                }
+
+            };
         }
     }
 
