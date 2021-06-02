@@ -28,7 +28,7 @@ public class PlannerCalendar {
 
     // Fields
     private long startTime; // This calendar starts from this time (ms) and ends 30 days after it.
-    private CalendarIntervalTree thisMonth;
+    private IntervalTree thisMonth;
     private HashMap<String, PlannerTag> tags;
 
     // Constructors
@@ -70,8 +70,7 @@ public class PlannerCalendar {
         }
 
         // Create occupiedTree and add events.
-        thisMonth = (CalendarIntervalTree) IntervalTreeBuilder.newBuilder()
-                                                              .usePredefinedType(IntervalTreeBuilder.IntervalType.LONG).build();
+        thisMonth = IntervalTreeBuilder.newBuilder().usePredefinedType(IntervalTreeBuilder.IntervalType.LONG).build();
         for (PlannerEvent event : eventList) {
             insertEvent(event);
         }
@@ -216,48 +215,6 @@ public class PlannerCalendar {
             if (!super.equals(o)) return false;
             OccupiedInterval that = (OccupiedInterval) o;
             return object.equals(that.object);
-        }
-    }
-
-    private class CalendarIntervalTree extends IntervalTree {
-        @Override
-        public Iterator<IInterval> iterator() {
-            final Iterator<IntervalTreeNode> outerNodeIt = nodeIterator();
-
-            return new Iterator<IInterval>() {
-                private Iterator<IInterval> nodeCollectionIt = null;
-                private IInterval next = findNext();
-
-                @Override
-                public boolean hasNext() {
-                    return this.next != null;
-                }
-
-                protected IInterval findNext() {
-                    if (this.nodeCollectionIt != null && this.nodeCollectionIt.hasNext()) {
-                        // nothing to do, next will return something
-                    } else if (outerNodeIt.hasNext()) {
-                        this.nodeCollectionIt = outerNodeIt.next().iterator();
-                    } else {
-                        return null;
-                    }
-
-                    return this.nodeCollectionIt.next();
-                }
-
-                @Override
-                public IInterval next() {
-                    if (!hasNext()) {
-                        throw new NoSuchElementException();
-                    }
-
-                    final IInterval result = this.next;
-                    this.next = findNext();
-
-                    return result;
-                }
-
-            };
         }
     }
 
