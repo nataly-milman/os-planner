@@ -65,7 +65,7 @@ public class PlannerCalendar {
 
         // Create occupiedTree and add events.
         thisMonth = IntervalTreeBuilder.newBuilder()
-                .usePredefinedType(IntervalTreeBuilder.IntervalType.LONG).build();
+                                       .usePredefinedType(IntervalTreeBuilder.IntervalType.LONG).build();
         for (PlannerEvent event : eventList) {
             insertEvent(event);
         }
@@ -173,10 +173,6 @@ public class PlannerCalendar {
     private int toSlotIndex(long time) {
         long diffInMillis = time - startTime;
         return (int) TimeUnit.MINUTES.convert(diffInMillis, TimeUnit.MILLISECONDS) / SLOT_SIZE;
-    }
-
-    public long getStartTime() {
-        return startTime;
     }
 
     // Inner classes
