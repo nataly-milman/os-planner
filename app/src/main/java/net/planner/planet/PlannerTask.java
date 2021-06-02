@@ -54,6 +54,10 @@ public class PlannerTask extends PlannerObject {
         return durationInMinutes;
     }
 
+    public long getDurationInMilliseconds() {
+        return durationInMinutes * 60000;
+    }
+
     public void setDurationInMinutes(int durationInMinutes) {
         this.durationInMinutes = durationInMinutes;
     }

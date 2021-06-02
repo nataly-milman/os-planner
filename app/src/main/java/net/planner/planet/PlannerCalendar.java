@@ -132,14 +132,6 @@ public class PlannerCalendar {
 
     public boolean insertTask(PlannerTask task) {
         // todo implement
-        long startTaskTime = this.startTime;
-        long endTaskTime = startTaskTime + task.getDurationInMilliseconds();
-        Iterator<IInterval> it = thisMonth.iterator();
-        while (it.hasNext()) {
-            IInterval busyInterval = it.next();
-            System.out.println(busyInterval.getNormStart());
-            return false;
-        }
         return false;
     }
 
