@@ -95,9 +95,9 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?, startingF
     }
 
     @JvmOverloads
-    fun addTask(title: String, deadlineTimeMillis: Long, durationInMinutes: Int, tag: String = "NoTag",
-                priority: Int = 9, location: String = "") {
-        if (tag != "NoTag" && !calendar.containsTag(tag)){
+    fun createTask(title: String, deadlineTimeMillis: Long, durationInMinutes: Int, tag: String = "NoTag",
+                priority: Int = 5, location: String = ""): PlannerTask {
+        if (tag != "NoTag" && !calendar.containsTag(tag)) {
             throw IllegalArgumentException(
                 "This tag doesn't exist"
             )
@@ -106,8 +106,19 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?, startingF
         task.setPriority(priority)
         task.setLocation(location)
         task.tagName = tag
+        return task
+    }
+
+    @JvmOverloads
+    fun addTask(title: String, deadlineTimeMillis: Long, durationInMinutes: Int, tag: String = "NoTag",
+                priority: Int = 9, location: String = "") {
+        val task = createTask(title, deadlineTimeMillis, durationInMinutes, tag, priority, location)
         calendar.insertTask(task)
         // @TODO add actions to calculate task subtask events
+    }
+
+    fun addTasksList(tasks: List<PlannerTask>) {
+        PlannerSolver.addTasks(tasks, calendar)
     }
 
     @SuppressLint("SimpleDateFormat")

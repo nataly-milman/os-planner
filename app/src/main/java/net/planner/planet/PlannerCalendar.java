@@ -4,8 +4,6 @@ import com.brein.time.exceptions.IllegalTimeInterval;
 import com.brein.time.exceptions.IllegalTimePoint;
 import com.brein.time.timeintervals.indexes.IntervalTree;
 import com.brein.time.timeintervals.indexes.IntervalTreeBuilder;
-import com.brein.time.timeintervals.indexes.IntervalTreeNode;
-import com.brein.time.timeintervals.intervals.IInterval;
 import com.brein.time.timeintervals.intervals.LongInterval;
 import com.brein.time.timeintervals.intervals.NumberInterval;
 
@@ -13,12 +11,8 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
-
-import kotlin.Pair;
 
 public class PlannerCalendar {
 
@@ -70,7 +64,8 @@ public class PlannerCalendar {
         }
 
         // Create occupiedTree and add events.
-        thisMonth = IntervalTreeBuilder.newBuilder().usePredefinedType(IntervalTreeBuilder.IntervalType.LONG).build();
+        thisMonth = IntervalTreeBuilder.newBuilder()
+                                       .usePredefinedType(IntervalTreeBuilder.IntervalType.LONG).build();
         for (PlannerEvent event : eventList) {
             insertEvent(event);
         }
@@ -109,11 +104,7 @@ public class PlannerCalendar {
         }
 
         OccupiedInterval toInsert = new OccupiedInterval(event);
-        boolean result =!thisMonth.contains(toInsert) && thisMonth.add(toInsert);
-        if (result && !thisMonth.isBalanced()){
-            thisMonth.balance();
-        }
-        return result;
+        return !thisMonth.contains(toInsert) && thisMonth.add(toInsert);
     }
 
     public boolean forceInsertEvent(PlannerEvent event) {
@@ -122,11 +113,7 @@ public class PlannerCalendar {
         }
 
         OccupiedInterval toInsert = new OccupiedInterval(event);
-        boolean result = thisMonth.add(toInsert);
-        if (result && !thisMonth.isBalanced()){
-            thisMonth.balance();
-        }
-        return result;
+        return thisMonth.add(toInsert);
     }
 
     public boolean insertTask(PlannerTask task) {
