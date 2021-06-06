@@ -101,7 +101,7 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?) : Activit
         task.setPriority(priority)
         task.setLocation(location)
         task.tagName = tag
-        calendar.insertTask(task)
+        // calendar.insertTask(task)
         // @TODO add actions to calculate task subtask events
     }
 

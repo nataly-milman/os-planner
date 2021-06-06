@@ -7,6 +7,7 @@ import com.brein.time.timeintervals.intervals.LongInterval;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
@@ -48,6 +49,14 @@ public class PlannerTag {
         return new ArrayList<>(forbiddenTimeIntervals);
     }
 
+    public Iterator<IInterval> getForbiddenTimeIntervalsIterator() {
+        return forbiddenTimeIntervals.iterator();
+    }
+
+    public final IntervalTree getForbiddenTimeIntervalsTree() {
+        return forbiddenTimeIntervals;
+    }
+
     public void addForbiddenTimeInterval(long from, long until) {
         if (until < from) {
             throw new IllegalArgumentException(
@@ -60,6 +69,14 @@ public class PlannerTag {
         return new ArrayList<>(preferredTimeIntervals);
     }
 
+    public Iterator<IInterval> getPreferredTimeIntervalsIterator() {
+        return preferredTimeIntervals.iterator();
+    }
+
+    public final IntervalTree getPreferredTimeIntervalsTree() {
+        return preferredTimeIntervals;
+    }
+
     public void addPreferredTimeInterval(long from, long until) {
         if (until < from) {
             throw new IllegalArgumentException(
@@ -69,11 +86,11 @@ public class PlannerTag {
     }
 
     public Collection<?> getForbiddenCollisions(long startDate, long endDate) {
-        return forbiddenTimeIntervals.find(new LongInterval(startDate, endDate));
+        return forbiddenTimeIntervals.overlap(new LongInterval(startDate, endDate));
     }
 
     public Collection<?> getPreferredCollisions(long startDate, long endDate) {
-        return preferredTimeIntervals.find(new LongInterval(startDate, endDate));
+        return preferredTimeIntervals.overlap(new LongInterval(startDate, endDate));
     }
 
     public boolean isIntervalForbidden(long startDate, long endDate) {
