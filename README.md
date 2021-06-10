@@ -23,11 +23,15 @@ Steps:
 2. Run the library and copy the created aar file from the generated folder.
 3. Paste the aar file into libs folder of your app.
 4. Add the following line to your module's gradle file:
-   In dependencies : implementation(name: 'library-debug', ext: 'aar')
-   In repositories : flatDir {
+   In dependencies :
+   implementation(name: 'library-debug', ext: 'aar')
+   
+   In repositories :
+   flatDir {
                              dirs 'libs'
                          }
 5. Add the following permissions to your AndroidManifest:
+
     <uses-permission android:name="android.permission.READ_CALENDAR" />
     <uses-permission android:name="android.permission.WRITE_CALENDAR" />
 
