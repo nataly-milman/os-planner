@@ -28,9 +28,6 @@ Steps:
    `implementation(name: 'library-debug', ext: 'aar')`<br/>
    In repositories:<br/>
    `flatDir { dirs 'libs' }`
-6. Add the following permissions to your AndroidManifest:</br>
-    `<uses-permission android:name="android.permission.READ_CALENDAR" />`</br>
-    `<uses-permission android:name="android.permission.WRITE_CALENDAR" />`
 
 To add a new calendar just use our preCreated PlannerManager, which can be synced with Google Calendar automatically, or insert events manually, as specified during creation.
 
