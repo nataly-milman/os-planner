@@ -16,18 +16,26 @@
 * PLANet can split up different tasks so you can use your time more efficiently.
 
 ## How to use the library?
-The current upload format for this repository currently requires you to pull the repository into Android Studio and compile from there, though you are also welcome to take any file you want from the project and to use it in your code in any way you would like :)
+The current upload format for this repository currently requires you to pull the repository into Android Studio and compile from there, though you are also welcome to take any file you want from the project and to use it in your code in any way you like :)
 
 Steps:
-1. Install Android Studio - Follow the instructions in https://developer.android.com/studio/install<br/>
-2. Clone the project to an empty folder using `git clone https://github.com/nataly-milman/os-planner.git`.
-3. Run the library and copy the created `.aar` file from the generated folder.
-4. Paste the `.aar` file into libs folder of your app.
-5. Add the following lines to your module's gradle file:<br/>
+1. Clone the project to an empty folder using `git clone https://github.com/nataly-milman/os-planner.git`.
+2. Run the library and copy the created `.aar` file from the generated folder.
+3. Paste the `.aar` file into libs folder of your app.
+4. Add the following lines to **your app's** module's gradle file:<br/>
    In dependencies:<br/>
-   `implementation(name: 'library-debug', ext: 'aar')`<br/>
+   ```java
+   implementation(name: 'library-debug', ext: 'aar')
+   ```
    In repositories:<br/>
-   `flatDir { dirs 'libs' }`
+   ```java
+   flatDir { dirs 'libs' }
+   ```
+5. Add the following permissions to **your app's** AndroidManifest:<br/>
+    ```java
+    <uses-permission android:name="android.permission.READ_CALENDAR" />
+    <uses-permission android:name="android.permission.WRITE_CALENDAR" />
+    ```
 
 To add a new calendar just use our preCreated PlannerManager, which can be synced with Google Calendar automatically, or insert events manually, as specified during creation.
 
