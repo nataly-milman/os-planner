@@ -16,7 +16,7 @@
 * PLANet can split up different tasks so you can use your time more efficiently.
 
 ## How to use the library?
-The current upload format for this repository currently requires you to pull the repository into Android Studio and compile from there, though you are also welcome to take whichever files you want from this project and to add them to your code in any way you like :)
+The current upload format for this repository requires you to pull the repository into Android Studio and compile from there, though you are also welcome to take whichever files you want from this project and to add them to your code in any way you like :)
 
 Steps:
 1. Clone git repo.
@@ -42,4 +42,4 @@ To add a new task and watch our sub task creation algorithm at play, use Planner
 and specify the task's deadline and expected duration it will take to complete in milliseconds.
 
 ## Regarding pull requests
-Any pull requests to the library will be reviewed by all main authors of this library and the request will only be accepted if approved by all three.
+Any pull requests to the library will be reviewed by all main authors of this library and the request will only be accepted if approved unanimously by all of us.
