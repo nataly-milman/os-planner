@@ -294,11 +294,6 @@ public class PlannerCalendar {
 
     public long getStartTime() {
         return startTime;
-
-
-    private int toSlotIndex(long time) {
-        long diffInMillis = time - startTime;
-        return (int) TimeUnit.MINUTES.convert(diffInMillis, TimeUnit.MILLISECONDS) / SLOT_SIZE;
     }
 
     // Inner classes
