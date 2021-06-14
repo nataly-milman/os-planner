@@ -34,8 +34,9 @@ Steps:
                          }
 5. Add the following permissions to your AndroidManifest:
 
-    <uses-permission android:name="android.permission.READ_CALENDAR" />
-    <uses-permission android:name="android.permission.WRITE_CALENDAR" />
+    `<uses-permission android:name="android.permission.READ_CALENDAR" />`
+    
+    `<uses-permission android:name="android.permission.WRITE_CALENDAR" />`
 
 To add a new calendar just use our preCreated PlannerManager, which can be synced with
 google calendar automatically, or insert events manually, as specified during creation.
