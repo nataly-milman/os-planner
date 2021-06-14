@@ -294,6 +294,7 @@ public class PlannerCalendar {
 
     public long getStartTime() {
         return startTime;
+    }
 
 
     private int toSlotIndex(long time) {
