@@ -2,7 +2,6 @@ package net.planner.exampleapp;
 
 import android.Manifest;
 import android.appwidget.AppWidgetManager;
-import android.appwidget.AppWidgetProvider;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.ContentUris;
 import android.content.Context;
@@ -14,9 +13,7 @@ import android.graphics.Canvas;
 import android.graphics.Point;
 import android.net.Uri;
 import android.provider.CalendarContract;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -29,15 +26,12 @@ import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.Toast;
 
-import net.planner.exampleapp.R;
-
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-import static com.opensource.roundcalendar.Logging.TAG;
+import static net.planner.exampleapp.Logging.TAG;
 import static java.util.Calendar.YEAR;
 
 public class WidgetConfigurationActivity extends AppCompatActivity {

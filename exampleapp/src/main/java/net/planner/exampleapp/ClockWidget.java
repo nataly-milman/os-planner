@@ -13,7 +13,7 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import static com.opensource.roundcalendar.Logging.TAG;
+import static net.planner.exampleapp.Logging.TAG;
 
 class ClockWidget {
 

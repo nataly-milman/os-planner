@@ -1,41 +1,35 @@
-package net.planner.exampleapp;
+package net.planner.exampleapp
 
-import android.support.annotation.NonNull;
+import lombok.Getter
+import lombok.Setter
+import java.util.*
 
-import java.util.Locale;
-
-import lombok.Getter;
-import lombok.Setter;
-
-
-public class CalendarInfo {
-    @Getter private int id;
-    @Getter private String account;
-    @Getter private String name;
-    @Setter @Getter private boolean selected = true;
-
-    private static int ALL_CALENDARS_ID = -100;
-
-    CalendarInfo(int id, String account, String name) {
-        this.id = id;
-        this.account = account;
-        this.name = name;
+class CalendarInfo @JvmOverloads internal constructor(
+    @field:Getter private val id: Int = ALL_CALENDARS_ID,
+    @field:Getter private val account: String? = null,
+    @field:Getter private val name: String? = null
+) {
+    @Setter
+    @Getter
+    private val selected = true
+    override fun toString(): String {
+        return String.format(Locale.getDefault(), "%s - %s", account, name)
     }
 
-    CalendarInfo() {
-        this(ALL_CALENDARS_ID, null, null);
+    fun toDebugString(): String {
+        return String.format(
+            Locale.getDefault(),
+            "ID: %d; account: %s; name: %s",
+            id,
+            account,
+            name
+        )
     }
 
-    @NonNull @Override
-    public String toString() {
-        return String.format(Locale.getDefault(), "%s - %s", account, name);
-    }
+    val isAllItem: Boolean
+        get() = id == ALL_CALENDARS_ID
 
-    String toDebugString() {
-        return String.format(Locale.getDefault(), "ID: %d; account: %s; name: %s", id, account, name);
-    }
-
-    boolean isAllItem() {
-        return (id == ALL_CALENDARS_ID);
+    companion object {
+        private const val ALL_CALENDARS_ID = -100
     }
 }
