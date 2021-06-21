@@ -116,7 +116,8 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:onClick="onSleepEndTimeChanged"
-                    android:text="@string/change" />
+                    android:text="@string/change"
+                    tools:ignore="OnClick" />
 
             </LinearLayout>
 

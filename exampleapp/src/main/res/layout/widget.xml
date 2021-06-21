@@ -11,11 +11,6 @@
         android:background="@drawable/background_widget"
         />
 
-    <ImageView
-        android:id="@+id/widgetClockView"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent" />
-
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -86,9 +81,19 @@
             android:textColor="#FFFFFF"
             android:visibility="visible"
             />
+
+        <ImageView
+            android:id="@+id/widgetClockView"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent" />
     </LinearLayout>
 
-
+    <Button
+        android:id="@+id/add_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="Add Task" />
 
 
 </RelativeLayout>

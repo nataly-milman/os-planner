@@ -85,6 +85,7 @@ public class WidgetConfigurationActivity extends AppCompatActivity {
         // end date view
         views.setImageViewBitmap(R.id.widgetClockView, bitmap);
 
+        //@TODO need to add specific command to draw add button here?
     }
 
     public static Point getWidgetSize(AppWidgetManager appWidgetManager, int appWidgetId) {
@@ -314,7 +315,7 @@ public class WidgetConfigurationActivity extends AppCompatActivity {
         // wait for the user to click on the save button -> when click the app will close and the
         // widget will appear
         new WaitForOptionsSaveThread(appWidgetId).start();
-
+        // @TODO this thread is what maintains the activity and what closes it after save finishes
     }
 
 }
