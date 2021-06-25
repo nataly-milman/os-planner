@@ -10,31 +10,28 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
 import static net.planner.exampleapp.Logging.TAG;
 
 class ClockWidget {
 
-    @Getter private int paddingRadius = 115;
-    @Getter private final int paddingDigits = 0;
-    @Getter private final int borderColor = Color.WHITE;
-    @Getter private final int fillColor = Color.TRANSPARENT;
-    @Getter private final int digitColor = Color.WHITE;
-    @Getter private final int eventTitleColor = Color.WHITE;
-    @Getter private final int eventArcColor = Color.BLUE; // seems like default Google Calendar event color
+    private int paddingRadius = 115;
+    private final int paddingDigits = 0;
+    private final int borderColor = Color.WHITE;
+    private final int fillColor = Color.TRANSPARENT;
+    private final int digitColor = Color.WHITE;
+    private final int eventTitleColor = Color.WHITE;
+    private final int eventArcColor = Color.BLUE; // seems like default Google Calendar event color
     private final int[] degrees = {0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180, 195, 210, 225, 240, 255,
             270, 285, 300, 315, 330, 345};
 
 
-    @Getter private int borderWidth;
-    @Getter private int handWidth;
-    @Getter private int dotRadius;
-    @Getter private int smallDigitSize;
-    @Getter private int bigDigitSize;
-    @Getter private int dateSize;
-    @Getter private int titleSize;
+    private int borderWidth;
+    private int handWidth;
+    private int dotRadius;
+    private int smallDigitSize;
+    private int bigDigitSize;
+    private int dateSize;
+    private int titleSize;
     private int markersLength;
     private double tiltedMarkersLength;
     private double digitRadiusPadding;
@@ -43,8 +40,8 @@ class ClockWidget {
     private int allDayEventsXPadding;
     private int allDayEventsYPadding;
 
-    @Getter private Point center;
-    @Getter private float radius;
+    private Point center;
+    private float radius;
     private Point screenSize;
     private List<Point> hoursCoordinates;
 
@@ -154,6 +151,72 @@ class ClockWidget {
         return new Point(dayOfWeekXPadding, dayOfWeekYPadding);
     }
 
+    public int getPaddingRadius() {
+        return paddingRadius;
+    }
+
+    public int getPaddingDigits() {
+        return paddingDigits;
+    }
+
+    public int getBorderColor() {
+        return borderColor;
+    }
+
+    public int getFillColor() {
+        return fillColor;
+    }
+
+    public int getDigitColor() {
+        return digitColor;
+    }
+
+    public int getEventTitleColor() {
+        return eventTitleColor;
+    }
+
+    public int getEventArcColor() {
+        return eventArcColor;
+    }
+
+    public int getBorderWidth() {
+        return borderWidth;
+    }
+
+    public int getHandWidth() {
+        return handWidth;
+    }
+
+    public int getDotRadius() {
+        return dotRadius;
+    }
+
+    public int getSmallDigitSize() {
+        return smallDigitSize;
+    }
+
+    public int getBigDigitSize() {
+        return bigDigitSize;
+    }
+
+    public int getDateSize() {
+        return dateSize;
+    }
+
+    public int getTitleSize() {
+        return titleSize;
+    }
+
+    public Point getCenter() {
+        return center;
+    }
+
+    public float getRadius() {
+        return radius;
+    }
+
+
+
     Point getAllDayEventListCoordinates() {
         return new Point(allDayEventsXPadding, allDayEventsYPadding);
     }
@@ -259,10 +322,23 @@ class ClockWidget {
         return hours;
     }
 
-    @AllArgsConstructor
     class EventDegreeData {
-        @Getter private float start;
-        @Getter private float sweep;
+        private float start;
+        private float sweep;
+
+        EventDegreeData(float start, float sweep) {
+            this.start = start;
+            this.sweep = sweep;
+
+        }
+
+        public float getStart() {
+            return start;
+        }
+
+        public float getSweep() {
+            return sweep;
+        }
     }
     
 }

@@ -67,7 +67,7 @@ public class WidgetProvider extends AppWidgetProvider {
             return;
         }
 
-        if (!action.equals(previousDayAction) && !action.equals(nextDayAction) && !action.equals(todayAction)
+        if (!action.equals(previousDayAction) && !action.equals(nextDayAction) && !action.equals(todayAction) && !action.equals(addTaskAction)
                 && !action.equals(AppWidgetManager.ACTION_APPWIDGET_OPTIONS_CHANGED)) {
             Log.d(TAG, "Unhandled action: " + action);
             super.onReceive(context, intent);
@@ -82,12 +82,12 @@ public class WidgetProvider extends AppWidgetProvider {
             daysShift = 0;
         }
 
+        int widgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, 0);
+
         if (action.equals(addTaskAction)) {
             // Add task button clicked - Open Add Task Activity
-            context.startActivity(AddTaskActivity.Companion.createIntent(context));
+            context.startActivity(AddTaskActivity.Companion.createIntent(context, widgetId));
         }
-
-        int widgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, 0);
         drawAndUpdate(context, widgetId);
         super.onReceive(context, intent);
     }

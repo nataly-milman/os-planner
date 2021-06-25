@@ -8,17 +8,15 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
-import lombok.Getter;
-
 import static net.planner.exampleapp.Logging.TAG;
 
 class Event {
 
-    @Getter private String title;
+    private String title;
     private long start;
     private long finish;
-    @Getter private boolean allDay;
-    @Getter private int color = Color.TRANSPARENT;
+    private boolean allDay;
+    private int color = Color.TRANSPARENT;
 
     Event(String title, String start, String finish, String duration, String allDay, int color) {
         this(title, start, finish, duration, allDay);
@@ -52,6 +50,30 @@ class Event {
 
     String getFinishTime() {
         return formatToTime(finish);
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public boolean isAllDay() {
+        return allDay;
+    }
+
+    public void setAllDay(boolean allDay) {
+        this.allDay = allDay;
+    }
+
+    public int getColor() {
+        return color;
+    }
+
+    public void setColor(int color) {
+        this.color = color;
     }
 
     // relevant to know how to draw the arc of the event - up-down or down-up

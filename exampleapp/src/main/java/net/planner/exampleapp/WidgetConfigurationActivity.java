@@ -84,8 +84,6 @@ public class WidgetConfigurationActivity extends AppCompatActivity {
         views.setTextViewText(R.id.dateView, date);
         // end date view
         views.setImageViewBitmap(R.id.widgetClockView, bitmap);
-
-        //@TODO need to add specific command to draw add button here?
     }
 
     public static Point getWidgetSize(AppWidgetManager appWidgetManager, int appWidgetId) {

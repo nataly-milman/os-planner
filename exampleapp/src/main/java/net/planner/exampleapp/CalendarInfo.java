@@ -4,15 +4,11 @@ import androidx.annotation.NonNull;
 
 import java.util.Locale;
 
-import lombok.Getter;
-import lombok.Setter;
-
-
 public class CalendarInfo {
-    @Getter private int id;
-    @Getter private String account;
-    @Getter private String name;
-    @Setter @Getter private boolean selected = true;
+    private int id;
+    private String account;
+    private String name;
+    private boolean selected = true;
 
     private static int ALL_CALENDARS_ID = -100;
 
@@ -38,4 +34,25 @@ public class CalendarInfo {
     boolean isAllItem() {
         return (id == ALL_CALENDARS_ID);
     }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getAccount() {
+        return account;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean isSelected() {
+        return selected;
+    }
+
+    public void setSelected(boolean selected) {
+        this.selected = selected;
+    }
+
 }
