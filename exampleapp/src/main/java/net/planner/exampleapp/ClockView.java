@@ -7,11 +7,10 @@ import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.support.v4.graphics.ColorUtils;
-import android.support.v7.widget.AppCompatImageView;
+import androidx.core.graphics.ColorUtils;
+import androidx.appcompat.widget.AppCompatImageView;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;

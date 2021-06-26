@@ -10,14 +10,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Point;
-import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.RemoteViews;
-import android.widget.Toast;
-
-import net.planner.exampleapp.R;
 
 import java.util.Calendar;
 
@@ -31,6 +25,7 @@ public class WidgetProvider extends AppWidgetProvider {
     private static final String todayAction = "todayAction";
     private static final String tickAction = "com.miltolstoy.roundcalendar.clockTickAction";
     private static final String openCalendarAction = "openCalendarAction";
+    private static final String addTaskAction = "addTaskAction";
 
     // If widget update will be too frequent, Android will block it at all. If widget update period will be large, it
     // will affect user experience. Recommended value >= 1 minute.
@@ -72,7 +67,7 @@ public class WidgetProvider extends AppWidgetProvider {
             return;
         }
 
-        if (!action.equals(previousDayAction) && !action.equals(nextDayAction) && !action.equals(todayAction)
+        if (!action.equals(previousDayAction) && !action.equals(nextDayAction) && !action.equals(todayAction) && !action.equals(addTaskAction)
                 && !action.equals(AppWidgetManager.ACTION_APPWIDGET_OPTIONS_CHANGED)) {
             Log.d(TAG, "Unhandled action: " + action);
             super.onReceive(context, intent);
@@ -88,6 +83,11 @@ public class WidgetProvider extends AppWidgetProvider {
         }
 
         int widgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, 0);
+
+        if (action.equals(addTaskAction)) {
+            // Add task button clicked - Open Add Task Activity
+            context.startActivity(AddTaskActivity.Companion.createIntent(context, widgetId, daysShift));
+        }
         drawAndUpdate(context, widgetId);
         super.onReceive(context, intent);
     }
@@ -138,6 +138,7 @@ public class WidgetProvider extends AppWidgetProvider {
         setOnClickIntent(context, views, widgetId, R.id.next_button, nextDayAction);
         setOnClickIntent(context, views, widgetId, R.id.today_button, todayAction);
         setOnClickIntent(context, views, widgetId, R.id.dateView, openCalendarAction);
+        setOnClickIntent(context, views, widgetId, R.id.add_button, addTaskAction);
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
         appWidgetManager.updateAppWidget(widgetId, views);
 
