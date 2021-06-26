@@ -41,5 +41,9 @@ google calendar automatically, or insert events manually, as specified during cr
 To add a new task and watch our sub task creation algorithm at play, use PlannerManager's addTask,
 and specify the task's deadline and expected duration it will take to complete in milliseconds.
 
+## An example of using PlannerManager can be seen in exampleapp.
+You can run exampleapp, add the widget created to your screen, and press AddTask to create a task using PLANet library.
+
+
 ## Regarding pull requests
 Any pull requests to the library will be reviewed by all main authors of this library and the request will only be accepted if approved unanimously by all of us.

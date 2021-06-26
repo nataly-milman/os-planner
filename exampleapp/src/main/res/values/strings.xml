@@ -1,0 +1,41 @@
+<resources>
+    <string name="app_name">RoundCalendar</string>
+    <string name="prev_day">&lt;</string>
+    <string name="next_day">&gt;</string>
+    <string name="today">T</string>
+    <string name="all_calendars">All</string>
+
+    <string name="calendars_chooser">Displayed calendars </string>
+
+    <string name="colors_chooser">Import events color </string>
+    <string name="use_calendar_color">Yes</string>
+    <string name="use_default_color">No</string>
+
+    <string name="sleep_start">Sleep start time -d </string>
+    <string name="sleep_end">Sleep end time - </string>
+    <string name="change">Change</string>
+
+    <string name="auto_update_enabled">Enable widget auto-update</string>
+    <string name="update_period_label">Widget update period (minutes): </string>
+    <string name="widget_background_label">Widget background opacity: </string>
+    <string name="update_period_default">30</string>
+
+    <string name="save_button">Save</string>
+    <string name="title_activity_add_task">AddTaskActivity</string>
+
+    <!-- Preference Titles -->
+    <string name="messages_header">Messages</string>
+    <string name="sync_header">Sync</string>
+
+    <!-- Messages Preferences -->
+    <string name="signature_title">Your signature</string>
+    <string name="reply_title">Default reply action</string>
+
+    <!-- Sync Preferences -->
+    <string name="sync_title">Sync email periodically</string>
+    <string name="attachment_title">Download incoming attachments</string>
+    <string name="attachment_summary_on">Automatically download attachments for incoming emails
+    </string>
+    <string name="attachment_summary_off">Only download attachments when manually requested</string>
+    <string name="task_title">Task Title</string>
+</resources>
