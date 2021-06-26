@@ -313,7 +313,6 @@ public class WidgetConfigurationActivity extends AppCompatActivity {
         // wait for the user to click on the save button -> when click the app will close and the
         // widget will appear
         new WaitForOptionsSaveThread(appWidgetId).start();
-        // @TODO this thread is what maintains the activity and what closes it after save finishes
     }
 
 }

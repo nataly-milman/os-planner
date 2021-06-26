@@ -86,7 +86,7 @@ public class WidgetProvider extends AppWidgetProvider {
 
         if (action.equals(addTaskAction)) {
             // Add task button clicked - Open Add Task Activity
-            context.startActivity(AddTaskActivity.Companion.createIntent(context, widgetId));
+            context.startActivity(AddTaskActivity.Companion.createIntent(context, widgetId, daysShift));
         }
         drawAndUpdate(context, widgetId);
         super.onReceive(context, intent);

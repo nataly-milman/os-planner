@@ -11,10 +11,6 @@
         <import type="net.planner.exampleapp.AddTaskActivity" />
 
         <variable
-            name="content"
-            type="net.planner.exampleapp.AddTaskActivity.Content" />
-
-        <variable
             name="eventHandler"
             type="net.planner.exampleapp.AddTaskActivity" />
     </data>
@@ -29,12 +25,12 @@
             android:id="@+id/lbl_task_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="40dp"
             android:layout_marginEnd="16dp"
             android:text="Title:"
             android:textSize="20sp"
-            app:layout_constraintEnd_toStartOf="@+id/textInputLayout"
+            app:layout_constraintEnd_toStartOf="@+id/lbl_title"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/add_task" />
 
@@ -47,19 +43,19 @@
             android:layout_marginBottom="10dp"
             android:text="Add Task"
             android:textSize="34sp"
-            app:layout_constraintBottom_toTopOf="@+id/textInputLayout"
+            app:layout_constraintBottom_toTopOf="@+id/lbl_title"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout"
+            android:id="@+id/lbl_title"
             android:layout_width="250dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
             android:layout_marginEnd="40dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/lbl_task_title"
+            app:layout_constraintStart_toStartOf="@+id/lbl_task_title"
             app:layout_constraintTop_toBottomOf="@+id/add_task">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -68,6 +64,9 @@
                 android:layout_height="wrap_content"
                 android:allowUndo="true"
                 android:singleLine="true"
+                android:textColorHighlight="@color/black"
+                android:textCursorDrawable="@color/black"
+                android:backgroundTint="@color/white"
                 android:textSize="16sp" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -75,30 +74,47 @@
             android:id="@+id/submit_deadline"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginEnd="16dp"
             android:text="Deadline:"
             android:textSize="20sp"
+            app:layout_constraintEnd_toStartOf="@+id/deadline_date"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
+            app:layout_constraintTop_toBottomOf="@+id/lbl_title" />
 
         <EditText
             android:id="@+id/deadline_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="17dp"
-            android:layout_marginTop="15dp"
-            android:ems="10"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="5dp"
+            android:ems="5"
             android:inputType="date"
+            app:layout_constraintEnd_toStartOf="@+id/deadline_time"
             app:layout_constraintStart_toEndOf="@+id/submit_deadline"
-            app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
+            app:layout_constraintTop_toBottomOf="@+id/lbl_title" />
+
+        <EditText
+            android:id="@+id/deadline_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="110dp"
+            android:ems="3"
+            android:inputType="time"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/deadline_date"
+            app:layout_constraintTop_toBottomOf="@+id/lbl_title" />
 
         <TextView
             android:id="@+id/estimated_duration"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="30dp"
             android:text="Estimated Duration:"
             android:textSize="20sp"
             app:layout_constraintStart_toStartOf="parent"
@@ -108,52 +124,32 @@
             android:id="@+id/estimated_duration_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="19dp"
+            android:layout_marginStart="10dp"
             android:layout_marginTop="18dp"
-            android:layout_marginEnd="10dp"
-            android:ems="10"
+            android:layout_marginEnd="110dp"
+            android:ems="3"
             android:inputType="time"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.51"
             app:layout_constraintStart_toEndOf="@+id/estimated_duration"
             app:layout_constraintTop_toBottomOf="@+id/deadline_date" />
-
-        <TextView
-            android:id="@+id/min_session_time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="26dp"
-            android:text="Min Session Time"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/estimated_duration"
-            tools:textSize="20sp" />
-
-        <EditText
-            android:id="@+id/edt_min_session_time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginTop="4dp"
-            android:ems="10"
-            android:inputType="time"
-            app:layout_constraintStart_toEndOf="@+id/min_session_time"
-            app:layout_constraintTop_toBottomOf="@+id/estimated_duration_time" />
 
         <Button
             android:id="@+id/save_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="156dp"
-            android:layout_marginTop="236dp"
+            android:layout_marginTop="30dp"
             android:layout_marginEnd="167dp"
             android:layout_marginBottom="148dp"
-            android:text="@string/save_button"
             android:background="@color/purple_200"
-            android:onClick="@{() -> eventHandler.onActionButtonClick()}"
+            android:onClick="@{() -> eventHandler.onSaveButtonClick()}"
+            android:text="@string/save_button"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/edt_min_session_time" />
+            app:layout_constraintTop_toBottomOf="@+id/estimated_duration_time" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 

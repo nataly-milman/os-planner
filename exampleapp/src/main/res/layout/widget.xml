@@ -3,7 +3,6 @@
     android:layout_height="match_parent"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-
     <TextView
         android:id="@+id/widget_background"
         android:layout_width="match_parent"
@@ -11,18 +10,34 @@
         android:background="@drawable/background_widget"
         />
 
-    <Button
-        android:id="@+id/add_button"
-        android:layout_width="wrap_content"
+    <ImageView
+        android:id="@+id/widgetClockView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" />
+
+    <RelativeLayout
+        android:layout_width="80dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="start|top"
-        android:text="Add Task" />
+        android:layout_alignParentEnd="true"
+        android:layout_gravity="center"
+        android:layout_marginEnd="7dp"
+        android:layout_marginTop="7dp">
+
+        <Button
+            android:id="@+id/add_button"
+            android:layout_width="80dp"
+            android:layout_height="60dp"
+            android:text="Add Task"
+            android:layout_alignParentRight="true"
+            />
+    </RelativeLayout>
+
 
     <LinearLayout
+        android:id="@+id/widget_center_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-
         android:orientation="vertical">
 
         <TextView
@@ -48,8 +63,9 @@
         <RelativeLayout
             android:layout_width="100dp"
             android:layout_height="wrap_content"
-           android:layout_gravity="center"
+            android:layout_gravity="center"
             >
+
 
             <ImageButton
                 android:id="@+id/previous_button"
@@ -88,14 +104,31 @@
             android:textColor="#FFFFFF"
             android:visibility="visible"
             />
-
-        <ImageView
-            android:id="@+id/widgetClockView"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent" />
     </LinearLayout>
 
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="10dp"
+        >
+        <TextView
+            android:id="@+id/all_day_event_textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            />
+        <TextView
+            android:id="@+id/time_to_next_event_textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="#F60303"
+            />
+    </LinearLayout>
+
+
+
 </RelativeLayout>
-
-
