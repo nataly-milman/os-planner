@@ -64,6 +64,23 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?, startingF
                 "This tag doesn't exist"
             )
         }
+
+        val event = createEvent(title, startTime, endTime, isAllDay, canBeScheduledOver, description, location, tag)
+
+        calendar.insertEvent(event)
+        // If this is a synced calendar, should be added to the users google calendar
+        if (this.shouldSync) {
+            Log.d(TAG, "addEvent: Adding created event to google calendar, default calendar")
+            val id = communicator?.insertEvent(callerActivity?.contentResolver, event)?.let {
+                event.setEventId(it)
+            }
+        }
+    }
+
+    private fun createEvent(title: String = "", startTime: Long, endTime: Long,
+                            isAllDay : Boolean = false, canBeScheduledOver : Boolean = true,
+                            description: String = "", location: String = "", tag: String = "NoTag") : PlannerEvent {
+
         val event = PlannerEvent(title, startTime, endTime)
         event.setLocation(location)
         event.tagName = tag
@@ -84,14 +101,7 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?, startingF
             event.endTime = formatter.parse("23:59 $newEndDate").time
         }
 
-        calendar.insertEvent(event)
-        // If this is a synced calendar, should be added to the users google calendar
-        if (this.shouldSync) {
-            Log.d(TAG, "addEvent: Adding created event to google calendar, default calendar")
-            val id = communicator?.insertEvent(callerActivity?.contentResolver, event)?.let {
-                event.setEventId(it)
-            }
-        }
+        return event
     }
 
     @JvmOverloads
@@ -113,8 +123,16 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?, startingF
     fun addTask(title: String, deadlineTimeMillis: Long, durationInMinutes: Int, tag: String = "NoTag",
                 priority: Int = 9, location: String = "") {
         val task = createTask(title, deadlineTimeMillis, durationInMinutes, tag, priority, location)
-        calendar.insertTask(task)
-        // @TODO add actions to calculate task subtask events
+        val wasAdded = calendar.insertTask(task)
+
+        if (wasAdded && this.shouldSync) {
+            Log.d(TAG, "addEvent: Adding created event to google calendar, default calendar")
+            // Adding task to googleCalendar as Event - Currently all the time requested at once!
+            val event = createEvent(title, deadlineTimeMillis - (durationInMinutes * 1000 * 60), deadlineTimeMillis, location = location, tag = tag)
+            val id = communicator?.insertEvent(callerActivity?.contentResolver, event)?.let {
+                event.setEventId(it)
+            }
+        }
     }
 
     fun addTasksList(tasks: List<PlannerTask>) {
