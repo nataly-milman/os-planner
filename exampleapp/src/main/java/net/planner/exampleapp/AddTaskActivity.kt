@@ -1,5 +1,6 @@
 package net.planner.exampleapp
 
+import android.app.DatePickerDialog
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
@@ -9,11 +10,15 @@ import androidx.databinding.BaseObservable
 import androidx.databinding.Bindable
 import androidx.databinding.DataBindingUtil
 import net.planner.exampleapp.databinding.ActivityAddTaskBinding
+import java.text.SimpleDateFormat
+import java.util.*
 
 class AddTaskActivity : AppCompatActivity() {
 
     companion object {
         private const val TAG = "AddTaskActivity"
+
+        val formatter = SimpleDateFormat("dd/MM/yyyy")
 
         fun createIntent(context: Context, widgetId: Int): Intent {
             val intent = Intent(context, AddTaskActivity::class.java)
@@ -21,6 +26,7 @@ class AddTaskActivity : AppCompatActivity() {
             return intent
         }
     }
+
 
     private val mContent = Content()
     private lateinit var mBinding: ActivityAddTaskBinding
@@ -30,8 +36,8 @@ class AddTaskActivity : AppCompatActivity() {
     private val titleInput: String
         get() = mBinding.edtTitle.text.toString().trim { it <= ' '}
 
-    private val deadline: String
-        get() = mBinding.deadlineDate.text.toString().trim { it <= ' '}
+//    private val deadline: String
+//        get() = mBinding.deadlineDate.text.toString().trim { it <= ' '}
 
     private val duration: String
         get() = mBinding.estimatedDurationTime.text.toString().trim { it <= ' '}
@@ -49,6 +55,20 @@ class AddTaskActivity : AppCompatActivity() {
 
         widgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,0)
 
+        mBinding.deadlineDate.setText(formatter.format(System.currentTimeMillis()))
+
+        // Open date picker for date
+        mBinding.deadlineDate.setOnClickListener {
+            val currentTime = Calendar.getInstance().apply {
+                timeInMillis = System.currentTimeMillis() // @TODO not current time but time the widget is showing
+            }
+            val dialog = DatePickerDialog(this, DatePickerDialog.OnDateSetListener { view, year, month, dayOfMonth ->
+                // Make the text resource of the deadline in add_task_activity dhow the date selected
+                // @TODO update
+                mBinding.deadlineDate.setText("$dayOfMonth/$month/$year") // @TODO add resource template and fill here
+            }, currentTime.get(Calendar.YEAR) , currentTime.get(Calendar.MONTH), currentTime.get(Calendar.DAY_OF_MONTH) )
+            dialog.show()
+        }
 
         // @TODO need to instantiate savedInstanceState with WidgetProvider information like which calendars to use
 
@@ -72,6 +92,7 @@ class AddTaskActivity : AppCompatActivity() {
 
 
     class Content : BaseObservable() {
+
         @get:Bindable
         var title: String = "Task"
             set(customerName) {
@@ -80,7 +101,7 @@ class AddTaskActivity : AppCompatActivity() {
             }
 
         @get:Bindable
-        var deadline: String = "29/06/21"
+        var deadline: String = formatter.format(System.currentTimeMillis())
             set(customerName) {
                 field = customerName
                 notifyPropertyChanged(BR.deadline)
