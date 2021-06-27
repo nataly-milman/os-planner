@@ -58,7 +58,7 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?, startingF
     @JvmOverloads
     fun addEvent(title: String = "", startTime: Long, endTime: Long,
                  isAllDay : Boolean = false, canBeScheduledOver : Boolean = true,
-                 description: String = "", location: String = "", tag: String = "NoTag") {
+                 description: String = "", location: String = "", tag: String = "NoTag"): PlannerEvent {
         if (tag != "NoTag" && !calendar.containsTag(tag)) {
             calendar.addTag(PlannerTag(tag))
         }
@@ -73,6 +73,7 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?, startingF
                 event.setEventId(it)
             }
         }
+        return event
     }
 
     private fun createEvent(title: String = "", startTime: Long, endTime: Long,
@@ -117,11 +118,11 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?, startingF
 
     @JvmOverloads
     fun addTask(title: String, deadlineTimeMillis: Long, durationInMinutes: Int, tag: String = "NoTag",
-                priority: Int = 9, location: String = "") {
+                priority: Int = 9, location: String = ""): PlannerTask {
         val task = createTask(title, deadlineTimeMillis, durationInMinutes, tag, priority, location)
-        val wasAdded = calendar.insertTask(task)
+        val insertedTask = PlannerSolver.addTask(task, calendar)
 
-        if (wasAdded && this.shouldSync) {
+        if (insertedTask != null && this.shouldSync) {
             Log.d(TAG, "addEvent: Adding created event to google calendar, default calendar")
             // Adding task to googleCalendar as Event - Currently all the time requested at once!
             val event = createEvent(title, deadlineTimeMillis - (durationInMinutes * 1000 * 60), deadlineTimeMillis, location = location, tag = tag)
@@ -129,10 +130,12 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?, startingF
                 event.setEventId(it)
             }
         }
+        return insertedTask
     }
 
-    fun addTasksList(tasks: List<PlannerTask>) {
-        PlannerSolver.addTasks(tasks, calendar)
+    fun addTasksList(tasks: List<PlannerTask>): MutableList<PlannerTask>? {
+        // returns list of the inserted tasks (may not include all tasks if failed on any of them
+        return PlannerSolver.addTasks(tasks, calendar)
     }
 
     @SuppressLint("SimpleDateFormat")
