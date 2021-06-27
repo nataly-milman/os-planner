@@ -59,10 +59,8 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?, startingF
     fun addEvent(title: String = "", startTime: Long, endTime: Long,
                  isAllDay : Boolean = false, canBeScheduledOver : Boolean = true,
                  description: String = "", location: String = "", tag: String = "NoTag") {
-        if (tag != "NoTag" && !calendar.containsTag(tag)){
-            throw IllegalArgumentException(
-                "This tag doesn't exist"
-            )
+        if (tag != "NoTag" && !calendar.containsTag(tag)) {
+            calendar.addTag(PlannerTag(tag))
         }
 
         val event = createEvent(title, startTime, endTime, isAllDay, canBeScheduledOver, description, location, tag)
@@ -80,7 +78,7 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?, startingF
     private fun createEvent(title: String = "", startTime: Long, endTime: Long,
                             isAllDay : Boolean = false, canBeScheduledOver : Boolean = true,
                             description: String = "", location: String = "", tag: String = "NoTag") : PlannerEvent {
-
+        // private function, the validity checks are performed in addEvent
         val event = PlannerEvent(title, startTime, endTime)
         event.setLocation(location)
         event.tagName = tag
@@ -108,9 +106,7 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?, startingF
     fun createTask(title: String, deadlineTimeMillis: Long, durationInMinutes: Int, tag: String = "NoTag",
                 priority: Int = 5, location: String = ""): PlannerTask {
         if (tag != "NoTag" && !calendar.containsTag(tag)) {
-            throw IllegalArgumentException(
-                "This tag doesn't exist"
-            )
+            calendar.addTag(PlannerTag(tag))
         }
         val task = PlannerTask(title, deadlineTimeMillis, durationInMinutes)
         task.setPriority(priority)

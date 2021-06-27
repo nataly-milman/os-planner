@@ -50,8 +50,8 @@ public class FlowExample {
         manager.addOrEditTag("sport", null, preferredTI, 8);
 
         long deadline = Objects.requireNonNull(ft.parse("2021-05-16 23:30")).getTime();
-        // unknown tag = exception
-        //manager.addTask("Yoga", deadline, 45,  "some test gibberish", 5);
+        // unknown tag is acceptable now
+        manager.addTask("Yoga", deadline, 45,  "weird new tag", 5);
         manager.addTask("Yoga", deadline, 45,  "sport", 5);
 
     }
