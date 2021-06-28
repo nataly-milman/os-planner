@@ -20,11 +20,13 @@ The current upload format for this repository requires you to pull the repositor
 
 Steps:
 1. Clone git repo.
-2. Run the library and copy the created aar file from the generated folder.
-3. Paste the aar file into libs folder of your app.
-4. Add the following line to your module's gradle file:
+2. Run 'Build' -> 'Make project'.
+3. Copy the created aar file from the 'app/build/outputs/aar' folder.
+4. Paste the aar file into libs folder of your app.
+5. Add the following line to your module's build.gradle file:
+
    In dependencies :
-   implementation(name: 'library-debug', ext: 'aar')
+   implementation(name: <Your_aar_file_name>, ext: 'aar')
    
    In repositories :
    flatDir {
@@ -32,8 +34,9 @@ Steps:
                          }
 5. Add the following permissions to your AndroidManifest:
 
-    <uses-permission android:name="android.permission.READ_CALENDAR" />
-    <uses-permission android:name="android.permission.WRITE_CALENDAR" />
+    `<uses-permission android:name="android.permission.READ_CALENDAR" />`
+    
+    `<uses-permission android:name="android.permission.WRITE_CALENDAR" />`
 
 To add a new calendar just use our preCreated PlannerManager, which can be synced with
 google calendar automatically, or insert events manually, as specified during creation.
