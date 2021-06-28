@@ -1,12 +1,6 @@
 package net.planner.planet;
 
-import android.os.Build;
-
-import androidx.annotation.RequiresApi;
-
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -30,7 +24,6 @@ public class PlannerSolver {
         }
 
         for (Integer name: tasksByTagPriority.descendingKeySet()) {
-            String key = name.toString();
             LinkedList<PlannerTask> value = tasksByTagPriority.get(name);
             if (value == null) continue;
             // high to low task priority in this tag priority group
@@ -41,9 +34,25 @@ public class PlannerSolver {
         return sortedTasks;
     }
 
-    public static void addTasks(List<PlannerTask> tasks, PlannerCalendar calendar){
+    public static List<PlannerTask> addTasks(List<PlannerTask> tasks, PlannerCalendar calendar){
+        LinkedList<PlannerTask> addedTasks = new LinkedList<>();
         for (PlannerTask task : sortTasks(tasks, calendar)){
-            calendar.insertTask(task);
+            PlannerTask addedTask = addTask(task, calendar);
+            if (addedTask != null){
+                addedTasks.add(addedTask);
+            } else {
+                // stop addition because one of the events couldn't be added
+                break;
+            }
         }
+        return addedTasks;
+    }
+
+    public static PlannerTask addTask(PlannerTask task, PlannerCalendar calendar){
+        // TODO the return value can be the list of events for each task
+        if (calendar.insertTask(task)) {  //TODO all insertion logic here
+            return task;
+        }
+        return null;
     }
 }

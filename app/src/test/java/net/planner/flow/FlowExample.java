@@ -1,23 +1,17 @@
 package net.planner.flow;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
 import kotlin.Pair;
 
 import net.planner.planet.PlannerManager;
+import net.planner.planet.PlannerTag;
 import net.planner.planet.PlannerTask;
 
-import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Objects;
 
 public class FlowExample {
@@ -47,12 +41,12 @@ public class FlowExample {
 
         List<Pair<Pair<Integer, Integer>, Pair<Integer, Integer>>> preferredTI =
                 List.of(new Pair<>(new Pair<>(17, 0), new Pair<>(22, 30)));
-        manager.addOrEditTag("sport", null, preferredTI, 8);
+        manager.addOrRewriteTag("sport", null, preferredTI, 8);
 
         long deadline = Objects.requireNonNull(ft.parse("2021-05-16 23:30")).getTime();
-        // unknown tag = exception
-        //manager.addTask("Yoga", deadline, 45,  "some test gibberish", 5);
-        manager.addTask("Yoga", deadline, 45,  "sport", 5);
+        // unknown tag is acceptable now
+        manager.addTask("Yoga", deadline, 45,  "weird new tag", 5);
+        manager.addTask("Yoga 2", deadline, 45,  "sport", 5);
 
     }
 
@@ -64,9 +58,9 @@ public class FlowExample {
         PlannerManager manager = new PlannerManager(false, null, calendarTestFrom);
 
 
-        manager.addOrEditTag("sport", null, null, 6);
-        manager.addOrEditTag("outside", null, null, 4);
-        manager.addOrEditTag("school", null, null, 9);
+        manager.addOrRewriteTag("sport", null, null, 6);
+        manager.addOrRewriteTag("outside", null, null, 4);
+        manager.addOrRewriteTag("school", null, null, 9);
 
         // all day event for two days, start and end time wouldn't matter
         LinkedList<PlannerTask> tasks = new LinkedList<>();
