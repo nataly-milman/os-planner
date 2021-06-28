@@ -273,7 +273,7 @@ public class PlannerCalendar {
     }
 
     public boolean removeTag(String tagName) {
-        if (tags.containsKey(tagName)) {
+        if (!tags.containsKey(tagName)) {
             return false;
         }
 

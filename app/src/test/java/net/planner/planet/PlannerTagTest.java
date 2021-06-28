@@ -1,7 +1,5 @@
 package net.planner.planet;
 
-import android.util.Pair;
-
 import com.brein.time.timeintervals.intervals.IInterval;
 import com.brein.time.timeintervals.intervals.LongInterval;
 
@@ -16,6 +14,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.DoubleAccumulator;
+
+import kotlin.Pair;
 
 import static org.junit.Assert.*;
 
@@ -67,5 +67,33 @@ public class PlannerTagTest {
             e.printStackTrace();
         }
         tag.addForbiddenTimeInterval(date1, date2);
+    }
+
+
+    @Test
+    public void tagsEditFromManager() throws ParseException {
+        SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd H:mm");
+        long calendarTestFrom = Objects.requireNonNull(ft.parse("2021-05-13 0:00")).getTime();
+        PlannerManager manager = new PlannerManager(false, null, calendarTestFrom);
+
+        PlannerTag sportTag = manager.addToTag("yoga", null, new kotlin.Pair<>(new kotlin.Pair<>(18, 0),
+                new Pair<>(23, 30)));
+        // edit tag that doesn't exist will not work:
+        assertNull(sportTag);
+        sportTag = manager.addOrRewriteTag("sport", null, null, 6);
+        sportTag = manager.renameTag(sportTag.getTagName(), "yoga");
+        assertEquals("yoga", sportTag.getTagName());
+        assertEquals(0, sportTag.getPreferredTimeIntervals().size());
+        assertEquals(0, sportTag.getForbiddenTimeIntervals().size());
+
+        sportTag = manager.addToTag("yoga", null, new kotlin.Pair<>(new kotlin.Pair<>(18, 0),
+                new Pair<>(23, 30)));
+        assertNotNull(sportTag);
+        assertTrue(0 < sportTag.getPreferredTimeIntervals().size());
+
+        manager.removeTag(sportTag.getTagName());
+        assertNull(manager.addToTag("yoga", null, new kotlin.Pair<>(new kotlin.Pair<>(18, 0),
+               new Pair<>(23, 30))));
+
     }
 }

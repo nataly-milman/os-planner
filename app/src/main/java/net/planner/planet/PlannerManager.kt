@@ -58,12 +58,12 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?, startingF
     @JvmOverloads
     fun addEvent(title: String = "", startTime: Long, endTime: Long,
                  isAllDay : Boolean = false, canBeScheduledOver : Boolean = true,
-                 description: String = "", location: String = "", tag: String = "NoTag"): PlannerEvent {
-        if (tag != "NoTag" && !calendar.containsTag(tag)) {
-            calendar.addTag(PlannerTag(tag))
+                 description: String = "", location: String = "", tagName: String = "NoTag"): PlannerEvent {
+        if (tagName != "NoTag" && !calendar.containsTag(tagName)) {
+            calendar.addTag(PlannerTag(tagName))
         }
 
-        val event = createEvent(title, startTime, endTime, isAllDay, canBeScheduledOver, description, location, tag)
+        val event = createEvent(title, startTime, endTime, isAllDay, canBeScheduledOver, description, location, tagName)
 
         calendar.insertEvent(event)
         // If this is a synced calendar, should be added to the users google calendar
@@ -78,11 +78,11 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?, startingF
 
     private fun createEvent(title: String = "", startTime: Long, endTime: Long,
                             isAllDay : Boolean = false, canBeScheduledOver : Boolean = true,
-                            description: String = "", location: String = "", tag: String = "NoTag") : PlannerEvent {
+                            description: String = "", location: String = "", tagName: String = "NoTag") : PlannerEvent {
         // private function, the validity checks are performed in addEvent
         val event = PlannerEvent(title, startTime, endTime)
         event.setLocation(location)
-        event.tagName = tag
+        event.tagName = tagName
         event.isExclusiveForItsTimeSlot = canBeScheduledOver
         event.setAllDay(isAllDay)
 
@@ -104,28 +104,28 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?, startingF
     }
 
     @JvmOverloads
-    fun createTask(title: String, deadlineTimeMillis: Long, durationInMinutes: Int, tag: String = "NoTag",
-                priority: Int = 5, location: String = ""): PlannerTask {
-        if (tag != "NoTag" && !calendar.containsTag(tag)) {
-            calendar.addTag(PlannerTag(tag))
+    fun createTask(title: String, deadlineTimeMillis: Long, durationInMinutes: Int, tagName: String = "NoTag",
+                   priority: Int = 5, location: String = ""): PlannerTask {
+        if (tagName != "NoTag" && !calendar.containsTag(tagName)) {
+            calendar.addTag(PlannerTag(tagName))
         }
         val task = PlannerTask(title, deadlineTimeMillis, durationInMinutes)
         task.setPriority(priority)
         task.setLocation(location)
-        task.tagName = tag
+        task.tagName = tagName
         return task
     }
 
     @JvmOverloads
-    fun addTask(title: String, deadlineTimeMillis: Long, durationInMinutes: Int, tag: String = "NoTag",
+    fun addTask(title: String, deadlineTimeMillis: Long, durationInMinutes: Int, tagName: String = "NoTag",
                 priority: Int = 9, location: String = ""): PlannerTask {
-        val task = createTask(title, deadlineTimeMillis, durationInMinutes, tag, priority, location)
+        val task = createTask(title, deadlineTimeMillis, durationInMinutes, tagName, priority, location)
         val insertedTask = PlannerSolver.addTask(task, calendar)
 
         if (insertedTask != null && this.shouldSync) {
             Log.d(TAG, "addEvent: Adding created event to google calendar, default calendar")
             // Adding task to googleCalendar as Event - Currently all the time requested at once!
-            val event = createEvent(title, deadlineTimeMillis - (durationInMinutes * 1000 * 60), deadlineTimeMillis, location = location, tag = tag)
+            val event = createEvent(title, deadlineTimeMillis - (durationInMinutes * 1000 * 60), deadlineTimeMillis, location = location, tagName = tagName)
             val id = communicator?.insertEvent(callerActivity?.contentResolver, event)?.let {
                 event.setEventId(it)
             }
@@ -161,8 +161,8 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?, startingF
         return dateIntervals
     }
 
-    fun addOrEditTag(title: String, forbiddenTimeIntervals: List<Pair<Pair<Int, Int>, Pair<Int, Int>>>? = null,
-               preferredTimeIntervals: List<Pair<Pair<Int, Int>, Pair<Int, Int>>>? = null, priority: Int = 5){
+    fun addOrRewriteTag(title: String, forbiddenTimeIntervals: List<Pair<Pair<Int, Int>, Pair<Int, Int>>>? = null,
+                        preferredTimeIntervals: List<Pair<Pair<Int, Int>, Pair<Int, Int>>>? = null, priority: Int = 5): PlannerTag {
         val tag = PlannerTag(title)
         tag.priority = priority
         for (pair in turnTimesIntoDates(forbiddenTimeIntervals)){
@@ -176,6 +176,37 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?, startingF
             calendar.removeTag(title)
         }
         calendar.addTag(tag)
+        return tag
+    }
+
+    fun removeTag(title: String){
+        if (calendar.containsTag(title)){
+            calendar.removeTag(title)
+        }
+    }
+
+    fun renameTag(oldTitle: String, newTitle: String): PlannerTag? {
+        if (!calendar.containsTag(oldTitle)){ return null}
+
+        val tag = calendar.getTag(oldTitle)
+        calendar.removeTag(oldTitle)
+        tag.tagName = newTitle
+        calendar.addTag(tag)
+        return tag
+    }
+
+    fun addToTag(title: String, forbiddenTimeInterval: Pair<Pair<Int, Int>, Pair<Int, Int>>? = null,
+                        preferredTimeInterval: Pair<Pair<Int, Int>, Pair<Int, Int>>? = null): PlannerTag? {
+        if (!calendar.containsTag(title)){ return null}
+        val tag = calendar.getTag(title)
+        for (pair in turnTimesIntoDates(listOfNotNull(forbiddenTimeInterval))){
+            tag.addForbiddenTimeInterval(pair.first, pair.second)
+        }
+
+        for (pair in turnTimesIntoDates(listOfNotNull(preferredTimeInterval))){
+            tag.addPreferredTimeInterval(pair.first, pair.second)
+        }
+        return tag
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
