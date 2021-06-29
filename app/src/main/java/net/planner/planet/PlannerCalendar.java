@@ -2,6 +2,7 @@ package net.planner.planet;
 
 import com.brein.time.exceptions.IllegalTimeInterval;
 import com.brein.time.exceptions.IllegalTimePoint;
+import com.brein.time.timeintervals.collections.ListIntervalCollection;
 import com.brein.time.timeintervals.indexes.IntervalTree;
 import com.brein.time.timeintervals.indexes.IntervalTreeBuilder;
 import com.brein.time.timeintervals.intervals.IInterval;
@@ -29,7 +30,7 @@ public class PlannerCalendar {
     // Fields
     private long startTime; // This calendar starts from this time (ms) and ends 30 days after it.
     private long spaceBetweenTasks;
-    private IntervalTree thisMonth;
+    private IntervalTree occupiedTree;
     private HashMap<String, PlannerTag> tags;
 
     // Constructors
@@ -75,12 +76,16 @@ public class PlannerCalendar {
         // Add tags.
         tags = new HashMap<>(tagList.size());
         for (PlannerTag tag : tagList) {
-            tags.put(tag.getTagName(), tag);
+            String tagName = tag.getTagName();
+            if (!tagName.equals(PlannerObject.NO_TAG)) {
+                tags.put(tagName, tag);
+            }
         }
 
         // Create occupiedTree and add events.
-        thisMonth = IntervalTreeBuilder.newBuilder()
-                .usePredefinedType(IntervalTreeBuilder.IntervalType.LONG).build();
+        occupiedTree = IntervalTreeBuilder.newBuilder()
+                .usePredefinedType(IntervalTreeBuilder.IntervalType.LONG)
+                .collectIntervals(interval -> new ListIntervalCollection()).build();
         for (PlannerEvent event : eventList) {
             insertEvent(event);
         }
@@ -91,7 +96,7 @@ public class PlannerCalendar {
 
     // Methods
     public Collection<IInterval> getCollisions(long startDate, long endDate) {
-        return thisMonth.overlap(new LongInterval(startDate, endDate));
+        return occupiedTree.overlap(new LongInterval(startDate, endDate));
     }
 
     public boolean isIntervalAvailable(long startDate, long endDate) {
@@ -99,7 +104,7 @@ public class PlannerCalendar {
     }
 
     public boolean isIntervalTaggedForbidden(String tagName, long startDate, long endDate) {
-        PlannerTag tag = tags.get(tagName);
+        PlannerTag tag = safeGetTag(tagName);
         if (tag == null) {
             return false;
         }
@@ -108,7 +113,7 @@ public class PlannerCalendar {
     }
 
     public boolean isIntervalTaggedPreferred(String tagName, long startDate, long endDate) {
-        PlannerTag tag = tags.get(tagName);
+        PlannerTag tag = safeGetTag(tagName);
         if (tag == null) {
             return false;
         }
@@ -122,7 +127,7 @@ public class PlannerCalendar {
         }
 
         OccupiedInterval toInsert = new OccupiedInterval(event);
-        return !thisMonth.contains(toInsert) && thisMonth.add(toInsert);
+        return !occupiedTree.contains(toInsert) && occupiedTree.add(toInsert);
     }
 
     public boolean forceInsertEvent(PlannerEvent event) {
@@ -131,7 +136,7 @@ public class PlannerCalendar {
         }
 
         OccupiedInterval toInsert = new OccupiedInterval(event);
-        return thisMonth.add(toInsert);
+        return occupiedTree.add(toInsert);
     }
 
     private long getSpacedStartTime(LongInterval interval) {
@@ -188,7 +193,7 @@ public class PlannerCalendar {
             if (possibleDuration >= desiredDuration) {
                 PlannerEvent toAdd = new PlannerEvent(task, startTime, startTime + desiredDuration);
                 assignments.add(toAdd);
-                thisMonth.add(new OccupiedInterval(toAdd));
+                occupiedTree.add(new OccupiedInterval(toAdd));
                 return assignments;
             }
         }
@@ -218,7 +223,7 @@ public class PlannerCalendar {
                 // The tagged interval is free and its long enough so we can push here.
                 PlannerEvent toAdd = new PlannerEvent(task, startTime, startTime + desiredDuration);
                 assignments.add(toAdd);
-                thisMonth.add(new OccupiedInterval(toAdd));
+                occupiedTree.add(new OccupiedInterval(toAdd));
                 return assignments;
             }
 
@@ -229,7 +234,7 @@ public class PlannerCalendar {
                 if (toCheck.irBefore(collision)) {
                     // Found free interval before some event/task so we can push here.
                     assignments.add(possibleEvent);
-                    thisMonth.add(toCheck);
+                    occupiedTree.add(toCheck);
                     return assignments;
                 }
             }
@@ -238,17 +243,17 @@ public class PlannerCalendar {
     }
 
     public List<PlannerEvent> preferredInsertTask(PlannerTask task) {
-        PlannerTag tag = tags.get(task.getTagName());
+        PlannerTag tag = safeGetTag(task.getTagName());
         if (tag == null) {
             return new LinkedList<>();
         }
 
-        return insertTaskHelper(task, tag.getPreferredTimeIntervalsIterator(), thisMonth);
+        return insertTaskHelper(task, tag.getPreferredTimeIntervalsIterator(), occupiedTree);
     }
 
     public List<PlannerEvent> insertTask(PlannerTask task) {
         FreeTimeIterator freeTimeIt = new FreeTimeIterator();
-        PlannerTag tag = tags.get(task.getTagName());
+        PlannerTag tag = safeGetTag(task.getTagName());
         if (tag == null) {
             return insertUntaggedTaskHelper(task, freeTimeIt);
         }
@@ -263,7 +268,7 @@ public class PlannerCalendar {
 
     public boolean removeEvent(PlannerEvent event) {
         OccupiedInterval toRemove = new OccupiedInterval(event);
-        return thisMonth.remove(toRemove);
+        return occupiedTree.remove(toRemove);
     }
 
     public boolean containsTag(String tagName) {
@@ -306,6 +311,13 @@ public class PlannerCalendar {
     }
 
     // Helper functions
+    private PlannerTag safeGetTag(String tagName) {
+        if (tagName == null || tagName.equals(PlannerObject.NO_TAG)) {
+            return null;
+        }
+        return tags.get(tagName);
+    }
+
     private boolean isValidDate(long time) {
         long diffInMillis = time - startTime;
         return diffInMillis >= 0 &&
@@ -324,7 +336,8 @@ public class PlannerCalendar {
         private LongInterval nextOccupied;
 
         public FreeTimeIterator() {
-            occupiedIt = thisMonth.iterator();
+
+            occupiedIt = occupiedTree.iterator();
             startTime = PlannerCalendar.this.startTime + spaceBetweenTasks;
 
             if (occupiedIt.hasNext()) {
