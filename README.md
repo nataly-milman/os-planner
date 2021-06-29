@@ -38,13 +38,13 @@ Steps:
     
     `<uses-permission android:name="android.permission.WRITE_CALENDAR" />`
 
-To add a new calendar just use our preCreated PlannerManager, which can be synced with
+To add a new calendar just use our preCreated PlannerMediator, which can be synced with
 google calendar automatically, or insert events manually, as specified during creation.
 
-To add a new task and watch our sub task creation algorithm at play, use PlannerManager's addTask,
+To add a new task and watch our sub task creation algorithm at play, use PlannerMediator's addTask,
 and specify the task's deadline and expected duration it will take to complete in milliseconds.
 
-## An example of using PlannerManager can be seen in exampleapp.
+## An example of using PlannerMediator can be seen in exampleapp.
 You can run exampleapp, add the widget created to your screen, and press AddTask to create a task using PLANet library.
 
 

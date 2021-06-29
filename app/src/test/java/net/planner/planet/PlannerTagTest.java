@@ -8,16 +8,16 @@ import org.junit.Test;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.atomic.DoubleAccumulator;
 
 import kotlin.Pair;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class PlannerTagTest {
 
@@ -74,7 +74,7 @@ public class PlannerTagTest {
     public void tagsEditFromManager() throws ParseException {
         SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd H:mm");
         long calendarTestFrom = Objects.requireNonNull(ft.parse("2021-05-13 0:00")).getTime();
-        PlannerManager manager = new PlannerManager(false, null, calendarTestFrom);
+        PlannerMediator manager = new PlannerMediator(false, null, calendarTestFrom);
 
         PlannerTag sportTag = manager.addToTag("yoga", null, new kotlin.Pair<>(new kotlin.Pair<>(18, 0),
                 new Pair<>(23, 30)));
@@ -93,7 +93,7 @@ public class PlannerTagTest {
 
         manager.removeTag(sportTag.getTagName());
         assertNull(manager.addToTag("yoga", null, new kotlin.Pair<>(new kotlin.Pair<>(18, 0),
-               new Pair<>(23, 30))));
+                new Pair<>(23, 30))));
 
     }
 }

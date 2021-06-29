@@ -5,10 +5,7 @@ import org.junit.Test;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Objects;
-
-import static org.junit.Assert.*;
 
 public class PlannerTaskTest {
     @Test
