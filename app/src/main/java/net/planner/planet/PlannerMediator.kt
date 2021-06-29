@@ -146,29 +146,26 @@ class PlannerMediator(syncGoogleCalendar: Boolean, activity: Activity?, starting
     fun addTask(
         title: String, deadlineTimeMillis: Long, durationInMinutes: Int, tagName: String = "NoTag",
         priority: Int = 9, location: String = ""
-    ): PlannerTask {
+    ): MutableList<PlannerEvent> {
         val task =
             createTask(title, deadlineTimeMillis, durationInMinutes, tagName, priority, location)
-        val insertedTask = PlannerSolver.addTask(task, calendar)
+        val insertedEvents = PlannerSolver.addTask(task, calendar)
 
-        if (insertedTask != null && this.shouldSync) {
+        if (insertedEvents.isNotEmpty() && this.shouldSync) {
             Log.d(TAG, "addEvent: Adding created event to google calendar, default calendar")
             // Adding task to googleCalendar as Event - Currently all the time requested at once!
-            val event = createEvent(
-                title,
-                deadlineTimeMillis - (durationInMinutes * 1000 * 60),
-                deadlineTimeMillis,
-                location = location,
-                tagName = tagName
-            )
+            val event = insertedEvents[0]
+            event.setLocation(location)
+            event.tagName = tagName
+
             val id = communicator?.insertEvent(callerActivity?.contentResolver, event)?.let {
                 event.setEventId(it)
             }
         }
-        return insertedTask
+        return insertedEvents
     }
 
-    fun addTasksList(tasks: List<PlannerTask>): MutableList<PlannerTask>? {
+    fun addTasksList(tasks: List<PlannerTask>): MutableList<MutableList<PlannerEvent>>? {
         // returns list of the inserted tasks (may not include all tasks if failed on any of them
         return PlannerSolver.addTasks(tasks, calendar)
     }
