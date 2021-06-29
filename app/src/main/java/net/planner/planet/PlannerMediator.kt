@@ -21,11 +21,9 @@ class PlannerMediator(syncGoogleCalendar: Boolean, activity: Activity?, starting
     private val formatter = SimpleDateFormat("H:mm MM/dd/yyyy")
 
     init {
-        if (calendarStartTime < 0) {
-            throw IllegalArgumentException(
-                "Error setting up user calendar - invalid start datetime, cannot be before " +
-                        "Thu Jan 01, 1970"
-            )
+        if (calendarStartTime < 0){
+            Log.e(TAG,"Error setting up user calendar - invalid start datetime, cannot be before " +
+                    "Thu Jan 01, 1970")
         }
         calendar = PlannerCalendar(calendarStartTime)
         shouldSync = syncGoogleCalendar
@@ -63,11 +61,13 @@ class PlannerMediator(syncGoogleCalendar: Boolean, activity: Activity?, starting
 
     @SuppressLint("SimpleDateFormat")
     @JvmOverloads
-    fun addEvent(
-        title: String = "", startTime: Long, endTime: Long,
-        isAllDay: Boolean = false, canBeScheduledOver: Boolean = true,
-        description: String = "", location: String = "", tagName: String = "NoTag"
-    ): PlannerEvent {
+    fun addEvent(title: String = "", startTime: Long, endTime: Long,
+                 isAllDay : Boolean = false, canBeScheduledOver : Boolean = true,
+                 description: String = "", location: String = "", tagName: String = "NoTag",
+                 reminder : Int = -1): PlannerEvent? {
+        if (!PlannerEvent.isValid(reminder, startTime, endTime)){
+            return null
+        }
         if (tagName != "NoTag" && !calendar.containsTag(tagName)) {
             calendar.addTag(PlannerTag(tagName))
         }
@@ -94,18 +94,18 @@ class PlannerMediator(syncGoogleCalendar: Boolean, activity: Activity?, starting
         return event
     }
 
-    private fun createEvent(
-        title: String = "", startTime: Long, endTime: Long,
-        isAllDay: Boolean = false, canBeScheduledOver: Boolean = true,
-        description: String = "", location: String = "", tagName: String = "NoTag"
-    ): PlannerEvent {
+
+    private fun createEvent(title: String = "", startTime: Long, endTime: Long,
+                            isAllDay : Boolean = false, canBeScheduledOver : Boolean = true,
+                            description: String = "", location: String = "", tagName: String = "NoTag",
+                            reminder : Int = -1) : PlannerEvent {
         // private function, the validity checks are performed in addEvent
         val event = PlannerEvent(title, startTime, endTime)
         event.setLocation(location)
         event.tagName = tagName
         event.isExclusiveForItsTimeSlot = canBeScheduledOver
         event.setAllDay(isAllDay)
-
+        event.setReminder(reminder)
         event.setDescription(description)
 
         if (isAllDay) {
@@ -143,14 +143,16 @@ class PlannerMediator(syncGoogleCalendar: Boolean, activity: Activity?, starting
     }
 
     @JvmOverloads
-    fun addTask(
-        title: String, deadlineTimeMillis: Long, durationInMinutes: Int, tagName: String = "NoTag",
-        priority: Int = 9, location: String = ""
-    ): MutableList<PlannerEvent> {
-        val task =
-            createTask(title, deadlineTimeMillis, durationInMinutes, tagName, priority, location)
-        val insertedEvents = PlannerSolver.addTask(task, calendar)
+    fun addTask(title: String, deadlineTimeMillis: Long, durationInMinutes: Int, tagName: String = "NoTag",
+                priority: Int = 9, location: String = "", maxSessionTimeInMinutes: Int = 60,
+                maxDivisionsNumber: Int = 1, reminder: Int = -1): MutableList<PlannerEvent>? {
+        if (!PlannerTask.isValid(reminder, priority, deadlineTimeMillis, durationInMinutes,
+            maxSessionTimeInMinutes,maxDivisionsNumber)){
+            return null
+        }
 
+        val task = createTask(title, deadlineTimeMillis, durationInMinutes, tagName, priority, location)
+        val insertedEvents = PlannerSolver.addTask(task, calendar)
         if (insertedEvents.isNotEmpty() && this.shouldSync) {
             Log.d(TAG, "addEvent: Adding created event to google calendar, default calendar")
             // Adding task to googleCalendar as Event - Currently all the time requested at once!
