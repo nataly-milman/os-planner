@@ -2,7 +2,6 @@ package net.planner.planet;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Date;
 import java.util.Objects;
 
 abstract class PlannerObject {

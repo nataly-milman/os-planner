@@ -14,8 +14,8 @@ How to use:
     <uses-permission android:name="android.permission.READ_CALENDAR" />
     <uses-permission android:name="android.permission.WRITE_CALENDAR" />
 
-To add a new calendar just use our preCreated PlannerManager, which can be synced with
+To add a new calendar just use our preCreated PlannerMediator, which can be synced with
 google calendar automatically, or insert events manually, as specified during creation.
 
-To add a new task and watch our sub task creation algorithm at play, use PlannerManager's addTask,
+To add a new task and watch our sub task creation algorithm at play, use PlannerMediator's addTask,
 and specify the task's deadline and expected duration it will take to complete in milliseconds.

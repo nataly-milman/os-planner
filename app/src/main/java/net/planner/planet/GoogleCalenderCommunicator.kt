@@ -25,7 +25,8 @@ class GoogleCalenderCommunicator {
     private val ONE_MONTH_MILLIS = TimeUnit.DAYS.toMillis(30)
 
     private val calenderIds = mutableSetOf<Long>()
-    private var mainCalendarID = 1L // Calendar to insert new events into by default. Selected as a calendar with the ending gmail.com or  default 1
+    private var mainCalendarID =
+        1L // Calendar to insert new events into by default. Selected as a calendar with the ending gmail.com or  default 1
 
 
     // Projection array. Creating indices for this array instead of doing
@@ -80,7 +81,7 @@ class GoogleCalenderCommunicator {
     }
 
 
-    fun findAccountCalendars(contentResolver: ContentResolver):  MutableCollection<Long> {
+    fun findAccountCalendars(contentResolver: ContentResolver): MutableCollection<Long> {
 
         // Run query to get all calendars in device
         val uri: Uri = CalendarContract.Calendars.CONTENT_URI
@@ -91,7 +92,7 @@ class GoogleCalenderCommunicator {
             val calenderID: Long = cur.getLong(PROJECTION_ID_INDEX)
             val displayName: String = cur.getString(PROJECTION_DISPLAY_NAME_INDEX)
             val ownerName: String = cur.getString(PROJECTION_OWNER_ACCOUNT_INDEX)
-            val primary : Int = cur.getInt(PROJECTION_IS_MAIN_ACCOUNT_INDEX)
+            val primary: Int = cur.getInt(PROJECTION_IS_MAIN_ACCOUNT_INDEX)
 
             if (displayName.contains("gmail") && primary == 1) {
                 Log.d(TAG, "findAccountCalendars: Primary and Gmail!")
@@ -99,7 +100,10 @@ class GoogleCalenderCommunicator {
             }
 
             calenderIds.add(calenderID)
-            Log.d(TAG, "findAccountCalendars: Found calender with name $displayName and id $calenderID of owner $ownerName ")
+            Log.d(
+                TAG,
+                "findAccountCalendars: Found calender with name $displayName and id $calenderID of owner $ownerName "
+            )
         }
         cur?.close()
 
@@ -107,8 +111,10 @@ class GoogleCalenderCommunicator {
     }
 
 
-    fun insertEvent(contentResolver: ContentResolver?, insertedEvent: PlannerEvent,
-                    calenderId : Long = mainCalendarID, timezone: String? = null) : Long {
+    fun insertEvent(
+        contentResolver: ContentResolver?, insertedEvent: PlannerEvent,
+        calenderId: Long = mainCalendarID, timezone: String? = null
+    ): Long {
         val startMillis = insertedEvent.startTime
         val endMillis = insertedEvent.endTime
         val eventTitle = insertedEvent.title
@@ -118,9 +124,12 @@ class GoogleCalenderCommunicator {
             put(CalendarContract.Events.DTSTART, startMillis)
             put(CalendarContract.Events.DTEND, endMillis)
             put(CalendarContract.Events.TITLE, eventTitle)
-            put(CalendarContract.Events.DESCRIPTION, eventDescription?: "")
+            put(CalendarContract.Events.DESCRIPTION, eventDescription ?: "")
             put(CalendarContract.Events.CALENDAR_ID, calenderId)
-            put(CalendarContract.Events.EVENT_TIMEZONE, timezone ?: TimeZone.getDefault().displayName)
+            put(
+                CalendarContract.Events.EVENT_TIMEZONE,
+                timezone ?: TimeZone.getDefault().displayName
+            )
         }
         val uri: Uri? = contentResolver?.insert(CalendarContract.Events.CONTENT_URI, values)
 
@@ -143,7 +152,12 @@ class GoogleCalenderCommunicator {
 
 
     @SuppressLint("SimpleDateFormat")
-    private fun getCalendarEvents(contentResolver: ContentResolver, calenderId: Long, startMillis: Long, endMillis: Long) : MutableCollection<PlannerEvent> {
+    private fun getCalendarEvents(
+        contentResolver: ContentResolver,
+        calenderId: Long,
+        startMillis: Long,
+        endMillis: Long
+    ): MutableCollection<PlannerEvent> {
         // Getting events process:
         // 1. Get the event information from the Events table.
         // 2. For each event, check if it's an all day event.
@@ -161,7 +175,13 @@ class GoogleCalenderCommunicator {
 
         val selectionArgs: Array<String> = arrayOf(calenderId.toString())
 
-        val instancesCur: Cursor? = contentResolver.query(builder.build(), EVENT_INSTANCE_PROJECTION, instancesSelection, selectionArgs, null)
+        val instancesCur: Cursor? = contentResolver.query(
+            builder.build(),
+            EVENT_INSTANCE_PROJECTION,
+            instancesSelection,
+            selectionArgs,
+            null
+        )
 
         while (instancesCur?.moveToNext() == true) {
             // Get the instance values
@@ -178,13 +198,24 @@ class GoogleCalenderCommunicator {
                 timeInMillis = eventEnd.toLong()
             }
             val formatter = SimpleDateFormat("MM/dd/yyyy")
-            Log.d(TAG, "getCalendarEvents: found event with id $eventID, starts ${formatter.format(startDate.time)} ends ${formatter.format(endDate.time)} from calendar $calenderId ")
+            Log.d(
+                TAG,
+                "getCalendarEvents: found event with id $eventID, starts ${
+                    formatter.format(startDate.time)
+                } ends ${formatter.format(endDate.time)} from calendar $calenderId "
+            )
 
             // Get the details of this event from the Events table
             val eventsUri: Uri = CalendarContract.Events.CONTENT_URI
             val eventsSelection: String = "${CalendarContract.Events._ID} = ?"
             val eventSelectionArgs: Array<String> = arrayOf(eventID.toString())
-            val eventsCur: Cursor? = contentResolver.query(eventsUri, EVENT_PROJECTION, eventsSelection, eventSelectionArgs, null)
+            val eventsCur: Cursor? = contentResolver.query(
+                eventsUri,
+                EVENT_PROJECTION,
+                eventsSelection,
+                eventSelectionArgs,
+                null
+            )
 
             while (eventsCur?.moveToNext() == true) {
                 val id: Long = eventsCur.getLong(PROJECTION_EVENT_ID_INDEX)
@@ -195,8 +226,11 @@ class GoogleCalenderCommunicator {
                 val location: String = eventsCur.getString(PROJECTION_EVENT_LOCATION_INDEX)
                 val color: Int = eventsCur.getInt(PROJECTION_DISPLAY_COLOR_INDEX)
 
-                Log.d(TAG, "getCalendarEvents: found event with id $id, titled ${title} with description: ${description} is all day? $allDay can be scheduled over? $availability, in location $location  with color: $color from calendar: $calenderId ")
-                val event = PlannerEvent(title,  startDate.timeInMillis, endDate.timeInMillis)
+                Log.d(
+                    TAG,
+                    "getCalendarEvents: found event with id $id, titled ${title} with description: ${description} is all day? $allDay can be scheduled over? $availability, in location $location  with color: $color from calendar: $calenderId "
+                )
+                val event = PlannerEvent(title, startDate.timeInMillis, endDate.timeInMillis)
                 event.setLocation(location)
                 event.tagName = color.toString()
                 event.exclusiveForItsTimeSlot = CalendarContract.Events.AVAILABILITY_BUSY != 0
@@ -213,7 +247,11 @@ class GoogleCalenderCommunicator {
     }
 
 
-    fun getUserEvents(caller:Activity, startMillis: Long? = null, endMillis: Long? = null) : MutableCollection<PlannerEvent>? {
+    fun getUserEvents(
+        caller: Activity,
+        startMillis: Long? = null,
+        endMillis: Long? = null
+    ): MutableCollection<PlannerEvent>? {
         if (!haveCalendarReadWritePermissions(caller)) {
             requestCalendarReadWritePermission(caller)
             Log.d(TAG, "Needed permissions - returning")
@@ -228,8 +266,9 @@ class GoogleCalenderCommunicator {
         val strongEndMillis = endMillis ?: strongStartMillis + ONE_MONTH_MILLIS
 
         if (calenderIds.isNotEmpty()) {
-            for (id in calenderIds ) {
-                val events = getCalendarEvents(contentResolver, id, strongStartMillis, strongEndMillis)
+            for (id in calenderIds) {
+                val events =
+                    getCalendarEvents(contentResolver, id, strongStartMillis, strongEndMillis)
                 allEvents.addAll(events)
             }
         } else {
@@ -243,11 +282,19 @@ class GoogleCalenderCommunicator {
     fun requestCalendarReadWritePermission(caller: Activity) {
         val permissionList: MutableList<String> = ArrayList()
 
-        if (ContextCompat.checkSelfPermission(caller, Manifest.permission.WRITE_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                caller,
+                Manifest.permission.WRITE_CALENDAR
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
             permissionList.add(Manifest.permission.WRITE_CALENDAR)
         }
 
-        if (ContextCompat.checkSelfPermission(caller, Manifest.permission.READ_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                caller,
+                Manifest.permission.READ_CALENDAR
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
             permissionList.add(Manifest.permission.READ_CALENDAR)
         }
 

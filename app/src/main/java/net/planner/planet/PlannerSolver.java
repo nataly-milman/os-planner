@@ -8,13 +8,13 @@ import java.util.TreeMap;
 
 public class PlannerSolver {
 
-    private static LinkedList<PlannerTask> sortTasks(List<PlannerTask> tasks, PlannerCalendar calendar){
+    private static LinkedList<PlannerTask> sortTasks(List<PlannerTask> tasks, PlannerCalendar calendar) {
         LinkedList<PlannerTask> sortedTasks = new LinkedList<>();
         TreeMap<Integer, LinkedList<PlannerTask>> tasksByTagPriority = new TreeMap<>();
         int priority;
-        for (PlannerTask task : tasks){
+        for (PlannerTask task : tasks) {
             priority = calendar.getTag(task.getTagName()).getPriority();
-            if (tasksByTagPriority.containsKey(priority)){
+            if (tasksByTagPriority.containsKey(priority)) {
                 Objects.requireNonNull(tasksByTagPriority.get(priority)).add(task);
             } else {
                 LinkedList<PlannerTask> newGroup = new LinkedList<>();
@@ -23,7 +23,7 @@ public class PlannerSolver {
             }
         }
 
-        for (Integer name: tasksByTagPriority.descendingKeySet()) {
+        for (Integer name : tasksByTagPriority.descendingKeySet()) {
             LinkedList<PlannerTask> value = tasksByTagPriority.get(name);
             if (value == null) continue;
             // high to low task priority in this tag priority group
@@ -34,11 +34,11 @@ public class PlannerSolver {
         return sortedTasks;
     }
 
-    public static List<PlannerTask> addTasks(List<PlannerTask> tasks, PlannerCalendar calendar){
+    public static List<PlannerTask> addTasks(List<PlannerTask> tasks, PlannerCalendar calendar) {
         LinkedList<PlannerTask> addedTasks = new LinkedList<>();
-        for (PlannerTask task : sortTasks(tasks, calendar)){
+        for (PlannerTask task : sortTasks(tasks, calendar)) {
             PlannerTask addedTask = addTask(task, calendar);
-            if (addedTask != null){
+            if (addedTask != null) {
                 addedTasks.add(addedTask);
             } else {
                 // stop addition because one of the events couldn't be added
@@ -48,7 +48,7 @@ public class PlannerSolver {
         return addedTasks;
     }
 
-    public static PlannerTask addTask(PlannerTask task, PlannerCalendar calendar){
+    public static PlannerTask addTask(PlannerTask task, PlannerCalendar calendar) {
         // TODO the return value can be the list of events for each task
         if (calendar.insertTask(task)) {  //TODO all insertion logic here
             return task;

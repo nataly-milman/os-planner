@@ -7,6 +7,7 @@ import com.brein.time.timeintervals.indexes.IntervalTreeBuilder;
 import com.brein.time.timeintervals.intervals.IInterval;
 import com.brein.time.timeintervals.intervals.LongInterval;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -23,7 +24,7 @@ public class PlannerCalendar {
     private static final int SPACE_IN_MINUTES = 15;
     private static final int MIN_SPACE_IN_SECONDS = 1;
     private static final long MIN_SPACE_IN_MILLIS = MIN_SPACE_IN_SECONDS * 1000L;
-    public static final long SPACE_IN_MILLIS = SPACE_IN_MINUTES * 60000L;
+    public static final long RECOMMENDED_SPACE_IN_MILLIS = SPACE_IN_MINUTES * 60000L;
 
     // Fields
     private long startTime; // This calendar starts from this time (ms) and ends 30 days after it.
@@ -33,28 +34,28 @@ public class PlannerCalendar {
 
     // Constructors
     public PlannerCalendar() {
-        init(System.currentTimeMillis(), SPACE_IN_MILLIS, Collections.emptyList(), Collections.emptyList());
+        init(System.currentTimeMillis(), MIN_SPACE_IN_MILLIS, Collections.emptyList(), Collections.emptyList());
     }
 
     public PlannerCalendar(long timeInMillis) {
-        init(timeInMillis, SPACE_IN_MILLIS, Collections.emptyList(), Collections.emptyList());
+        init(timeInMillis, MIN_SPACE_IN_MILLIS, Collections.emptyList(), Collections.emptyList());
     }
 
     public PlannerCalendar(long timeInMillis, long spaceBetweenTasks) {
-        if (spaceBetweenTasks <= MIN_SPACE_IN_MILLIS) spaceBetweenTasks = SPACE_IN_MILLIS;
+        if (spaceBetweenTasks < MIN_SPACE_IN_MILLIS) spaceBetweenTasks = MIN_SPACE_IN_MILLIS;
 
         init(timeInMillis, spaceBetweenTasks, Collections.emptyList(), Collections.emptyList());
     }
 
     public PlannerCalendar(long timeInMillis, long spaceBetweenTasks, List<PlannerEvent> eventList) {
-        if (spaceBetweenTasks <= MIN_SPACE_IN_MILLIS) spaceBetweenTasks = SPACE_IN_MILLIS;
+        if (spaceBetweenTasks < MIN_SPACE_IN_MILLIS) spaceBetweenTasks = MIN_SPACE_IN_MILLIS;
         if (eventList == null) eventList = Collections.emptyList();
 
         init(timeInMillis, spaceBetweenTasks, eventList, Collections.emptyList());
     }
 
     public PlannerCalendar(long timeInMillis, long spaceBetweenTasks, List<PlannerEvent> eventList, List<PlannerTag> newTags) {
-        if (spaceBetweenTasks <= MIN_SPACE_IN_MILLIS) spaceBetweenTasks = SPACE_IN_MILLIS;
+        if (spaceBetweenTasks < MIN_SPACE_IN_MILLIS) spaceBetweenTasks = MIN_SPACE_IN_MILLIS;
         if (eventList == null) eventList = Collections.emptyList();
         if (newTags == null) newTags = Collections.emptyList();
 
@@ -79,7 +80,7 @@ public class PlannerCalendar {
 
         // Create occupiedTree and add events.
         thisMonth = IntervalTreeBuilder.newBuilder()
-                                       .usePredefinedType(IntervalTreeBuilder.IntervalType.LONG).build();
+                .usePredefinedType(IntervalTreeBuilder.IntervalType.LONG).build();
         for (PlannerEvent event : eventList) {
             insertEvent(event);
         }
@@ -285,6 +286,14 @@ public class PlannerCalendar {
         return tags.get(tagName);
     }
 
+    public List<String> getTagNames() {
+        return new ArrayList<>(tags.keySet());
+    }
+
+    public List<PlannerTag> getTags() {
+        return new ArrayList<>(tags.values());
+    }
+
     // Helper functions
     private boolean isValidDate(long time) {
         long diffInMillis = time - startTime;
@@ -382,7 +391,7 @@ public class PlannerCalendar {
             if (o == null || getClass() != o.getClass()) return false;
             if (!super.equals(o)) return false;
             OccupiedInterval that = (OccupiedInterval) o;
-            return object.equals(that.object);
+            return object.title.equals(that.object.title);
         }
     }
 
