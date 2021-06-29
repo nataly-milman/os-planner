@@ -172,7 +172,8 @@ public class PlannerCalendar {
     }
 
     // todo add task splitting
-    private boolean insertUntaggedTaskHelper(PlannerTask task, Iterator<IInterval> possibleIterator) {
+    private LinkedList<PlannerEvent> insertUntaggedTaskHelper(PlannerTask task, Iterator<IInterval> possibleIterator) {
+        LinkedList<PlannerEvent> assignments = new LinkedList<>();
         long desiredDuration = task.getDurationInMillis() + spaceBetweenTasks;
 
         // Iterate over possible intervals.
@@ -185,13 +186,17 @@ public class PlannerCalendar {
             // Check if tagged interval is long enough.
             long possibleDuration = possibleInterval.getEnd() - startTime;
             if (possibleDuration >= desiredDuration) {
-                return thisMonth.add(new OccupiedInterval(task, startTime, startTime + desiredDuration));
+                PlannerEvent toAdd = new PlannerEvent(task, startTime, startTime + desiredDuration);
+                assignments.add(toAdd);
+                thisMonth.add(new OccupiedInterval(toAdd));
+                return assignments;
             }
         }
-        return false;
+        return assignments;
     }
 
-    private boolean insertTaskHelper(PlannerTask task, Iterator<IInterval> possibleIterator, IntervalTree collisionTree) {
+    private LinkedList<PlannerEvent> insertTaskHelper(PlannerTask task, Iterator<IInterval> possibleIterator, IntervalTree collisionTree) {
+        LinkedList<PlannerEvent> assignments = new LinkedList<>();
         long desiredDuration = task.getDurationInMillis() + spaceBetweenTasks;
 
         // Iterate over possible intervals.
@@ -211,31 +216,37 @@ public class PlannerCalendar {
             Collection<IInterval> collisions = mergeOverlapping(collisionTree.overlap(possibleInterval));
             if (collisions.isEmpty()) {
                 // The tagged interval is free and its long enough so we can push here.
-                return thisMonth.add(new OccupiedInterval(task, startTime, startTime + desiredDuration));
+                PlannerEvent toAdd = new PlannerEvent(task, startTime, startTime + desiredDuration);
+                assignments.add(toAdd);
+                thisMonth.add(new OccupiedInterval(toAdd));
+                return assignments;
             }
 
             //  Check if we can push task in between a pair of collision intervals.
             for (IInterval collision : collisions) {
-                OccupiedInterval toCheck = new OccupiedInterval(task, startTime, startTime + desiredDuration);
+                PlannerEvent possibleEvent = new PlannerEvent(task, startTime, startTime + desiredDuration);
+                OccupiedInterval toCheck = new OccupiedInterval(possibleEvent);
                 if (toCheck.irBefore(collision)) {
                     // Found free interval before some event/task so we can push here.
-                    return thisMonth.add(toCheck);
+                    assignments.add(possibleEvent);
+                    thisMonth.add(toCheck);
+                    return assignments;
                 }
             }
         }
-        return false;
+        return assignments;
     }
 
-    public boolean preferredInsertTask(PlannerTask task) {
+    public List<PlannerEvent> preferredInsertTask(PlannerTask task) {
         PlannerTag tag = tags.get(task.getTagName());
         if (tag == null) {
-            return false;
+            return new LinkedList<>();
         }
 
         return insertTaskHelper(task, tag.getPreferredTimeIntervalsIterator(), thisMonth);
     }
 
-    public boolean insertTask(PlannerTask task) {
+    public List<PlannerEvent> insertTask(PlannerTask task) {
         FreeTimeIterator freeTimeIt = new FreeTimeIterator();
         PlannerTag tag = tags.get(task.getTagName());
         if (tag == null) {
@@ -245,9 +256,9 @@ public class PlannerCalendar {
         return insertTaskHelper(task, freeTimeIt, tag.getForbiddenTimeIntervalsTree());
     }
 
-    public boolean forceInsertTask(PlannerTask task) {
+    public List<PlannerEvent> forceInsertTask(PlannerTask task) {
         // todo implement
-        return false;
+        return new LinkedList<>();
     }
 
     public boolean removeEvent(PlannerEvent event) {
@@ -368,21 +379,16 @@ public class PlannerCalendar {
 
     private static class OccupiedInterval extends LongInterval {
 
-        public PlannerObject object;
+        public PlannerEvent event;
 
         public OccupiedInterval() {
             super();
-            this.object = null;
+            event = null;
         }
 
         public OccupiedInterval(PlannerEvent event) throws IllegalTimeInterval, IllegalTimePoint {
             super(event.getStartTime(), event.getStartTime(), false, false);
-            this.object = event;
-        }
-
-        public OccupiedInterval(PlannerTask task, long startDate, long endDate) throws IllegalTimeInterval, IllegalTimePoint {
-            super(startDate, endDate, false, false);
-            this.object = task;
+            this.event = event;
         }
 
         @Override
@@ -391,7 +397,7 @@ public class PlannerCalendar {
             if (o == null || getClass() != o.getClass()) return false;
             if (!super.equals(o)) return false;
             OccupiedInterval that = (OccupiedInterval) o;
-            return object.title.equals(that.object.title);
+            return event.equals(that.event);
         }
     }
 
