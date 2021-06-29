@@ -2,12 +2,8 @@ package net.planner.planet;
 
 import android.icu.util.DateInterval;
 import android.util.Log;
-
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.time.DateTimeException;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Objects;
 
@@ -18,10 +14,12 @@ public class PlannerEvent extends PlannerObject {
     private long endTime;
     private long eventId;
     private boolean isAllDay;
+    private final PlannerTask parentTask;
 
     // constructors
     public PlannerEvent(String title, long startTime, long endTime) {
         super(title);
+        this.parentTask = null;
         if (endTime < startTime) {
             Log.e(TAG,"Illegal time interval: Event cannot end before it starts");
             return;
@@ -31,6 +29,16 @@ public class PlannerEvent extends PlannerObject {
         this.endTime = endTime;
         this.eventId = -1L;
         this.isAllDay = false; // @TODO check duration?
+    }
+
+    public PlannerEvent(PlannerTask task, long startTime, long endTime) {
+        super(task.title);
+        this.title = task.title;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.eventId = -1L;
+        this.isAllDay = false; // @TODO check duration?
+        this.parentTask = task;
     }
     // validity check
     public static boolean isValid(int reminder, long startTime, long endTime) {
@@ -88,6 +96,9 @@ public class PlannerEvent extends PlannerObject {
         this.isAllDay = isAllDay;
     }
 
+    public final PlannerTask getParentTask() {
+        return parentTask;
+    }
 
     @NotNull
     @Override
@@ -110,7 +121,9 @@ public class PlannerEvent extends PlannerObject {
             return false;
         }
         PlannerEvent that = (PlannerEvent) o;
-        return getStartTime() == that.getStartTime() && getEndTime() == that.getEndTime();
+
+        boolean doesParentTaskMatch = parentTask == that.parentTask || parentTask.equals(that.parentTask);
+        return doesParentTaskMatch && getStartTime() == that.getStartTime() && getEndTime() == that.getEndTime();
     }
 
     @Override

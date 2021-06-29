@@ -7,7 +7,8 @@ import androidx.core.app.ActivityCompat
 import java.text.SimpleDateFormat
 import java.util.*
 
-class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?, startingFrom: Long?) : ActivityCompat.OnRequestPermissionsResultCallback  {
+class PlannerMediator(syncGoogleCalendar: Boolean, activity: Activity?, startingFrom: Long?) :
+    ActivityCompat.OnRequestPermissionsResultCallback {
     private val TAG = "PlannerManager"
 
     private val calendar: PlannerCalendar
@@ -18,8 +19,9 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?, startingF
 
     @SuppressLint("SimpleDateFormat")
     private val formatter = SimpleDateFormat("H:mm MM/dd/yyyy")
+
     init {
-        if (calendarStartTime >= 0){
+        if (calendarStartTime < 0){
             Log.e(TAG,"Error setting up user calendar - invalid start datetime, cannot be before " +
                     "Thu Jan 01, 1970")
         }
@@ -38,7 +40,10 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?, startingF
                 }
 
             } else {
-                Log.e(TAG, "Error getting user connected events - Cannot get google calendar events without an activity ")
+                Log.e(
+                    TAG,
+                    "Error getting user connected events - Cannot get google calendar events without an activity "
+                )
             }
         }
     }
@@ -67,7 +72,16 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?, startingF
             calendar.addTag(PlannerTag(tagName))
         }
 
-        val event = createEvent(title, startTime, endTime, isAllDay, canBeScheduledOver, description, location, tagName)
+        val event = createEvent(
+            title,
+            startTime,
+            endTime,
+            isAllDay,
+            canBeScheduledOver,
+            description,
+            location,
+            tagName
+        )
 
         calendar.insertEvent(event)
         // If this is a synced calendar, should be added to the users google calendar
@@ -79,6 +93,7 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?, startingF
         }
         return event
     }
+
 
     private fun createEvent(title: String = "", startTime: Long, endTime: Long,
                             isAllDay : Boolean = false, canBeScheduledOver : Boolean = true,
@@ -93,7 +108,7 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?, startingF
         event.setReminder(reminder)
         event.setDescription(description)
 
-        if (isAllDay){
+        if (isAllDay) {
             var date = (Calendar.getInstance().apply { timeInMillis = startTime })
             val newStartDate = SimpleDateFormat("MM/dd/yyyy").format(date.time)
             event.startTime = formatter.parse("0:0 $newStartDate").time
@@ -108,9 +123,15 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?, startingF
         return event
     }
 
+    fun removeEvent(event: PlannerEvent) {
+        calendar.removeEvent(event)
+    }
+
     @JvmOverloads
-    fun createTask(title: String, deadlineTimeMillis: Long, durationInMinutes: Int, tagName: String = "NoTag",
-                   priority: Int = 5, location: String = ""): PlannerTask {
+    fun createTask(
+        title: String, deadlineTimeMillis: Long, durationInMinutes: Int, tagName: String = "NoTag",
+        priority: Int = 5, location: String = ""
+    ): PlannerTask {
         if (tagName != "NoTag" && !calendar.containsTag(tagName)) {
             calendar.addTag(PlannerTag(tagName))
         }
@@ -124,27 +145,29 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?, startingF
     @JvmOverloads
     fun addTask(title: String, deadlineTimeMillis: Long, durationInMinutes: Int, tagName: String = "NoTag",
                 priority: Int = 9, location: String = "", maxSessionTimeInMinutes: Int = 60,
-                maxDivisionsNumber: Int = 1, reminder: Int = -1): PlannerTask? {
+                maxDivisionsNumber: Int = 1, reminder: Int = -1): MutableList<PlannerEvent>? {
         if (!PlannerTask.isValid(reminder, priority, deadlineTimeMillis, durationInMinutes,
             maxSessionTimeInMinutes,maxDivisionsNumber)){
             return null
         }
 
         val task = createTask(title, deadlineTimeMillis, durationInMinutes, tagName, priority, location)
-        val insertedTask = PlannerSolver.addTask(task, calendar)
-
-        if (insertedTask != null && this.shouldSync) {
+        val insertedEvents = PlannerSolver.addTask(task, calendar)
+        if (insertedEvents.isNotEmpty() && this.shouldSync) {
             Log.d(TAG, "addEvent: Adding created event to google calendar, default calendar")
             // Adding task to googleCalendar as Event - Currently all the time requested at once!
-            val event = createEvent(title, deadlineTimeMillis - (durationInMinutes * 1000 * 60), deadlineTimeMillis, location = location, tagName = tagName)
+            val event = insertedEvents[0]
+            event.setLocation(location)
+            event.tagName = tagName
+
             val id = communicator?.insertEvent(callerActivity?.contentResolver, event)?.let {
                 event.setEventId(it)
             }
         }
-        return insertedTask
+        return insertedEvents
     }
 
-    fun addTasksList(tasks: List<PlannerTask>): MutableList<PlannerTask>? {
+    fun addTasksList(tasks: List<PlannerTask>): MutableList<MutableList<PlannerEvent>>? {
         // returns list of the inserted tasks (may not include all tasks if failed on any of them
         return PlannerSolver.addTasks(tasks, calendar)
     }
@@ -172,32 +195,42 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?, startingF
         return dateIntervals
     }
 
-    fun addOrRewriteTag(title: String, forbiddenTimeIntervals: List<Pair<Pair<Int, Int>, Pair<Int, Int>>>? = null,
-                        preferredTimeIntervals: List<Pair<Pair<Int, Int>, Pair<Int, Int>>>? = null, priority: Int = 5): PlannerTag {
+    fun addOrRewriteTag(
+        title: String,
+        forbiddenTimeIntervals: List<Pair<Pair<Int, Int>, Pair<Int, Int>>>? = null,
+        preferredTimeIntervals: List<Pair<Pair<Int, Int>, Pair<Int, Int>>>? = null,
+        priority: Int = 5
+    ): PlannerTag {
         val tag = PlannerTag(title)
         tag.priority = priority
-        for (pair in turnTimesIntoDates(forbiddenTimeIntervals)){
+        for (pair in turnTimesIntoDates(forbiddenTimeIntervals)) {
             tag.addForbiddenTimeInterval(pair.first, pair.second)
         }
 
-        for (pair in turnTimesIntoDates(preferredTimeIntervals)){
+        for (pair in turnTimesIntoDates(preferredTimeIntervals)) {
             tag.addPreferredTimeInterval(pair.first, pair.second)
         }
-        if (calendar.containsTag(title)){
+        if (calendar.containsTag(title)) {
             calendar.removeTag(title)
         }
         calendar.addTag(tag)
         return tag
     }
 
-    fun removeTag(title: String){
-        if (calendar.containsTag(title)){
+    fun getTagNameList(): MutableList<String>? {
+        return calendar.tagNames;
+    }
+
+    fun removeTag(title: String) {
+        if (calendar.containsTag(title)) {
             calendar.removeTag(title)
         }
     }
 
     fun renameTag(oldTitle: String, newTitle: String): PlannerTag? {
-        if (!calendar.containsTag(oldTitle)){ return null}
+        if (!calendar.containsTag(oldTitle)) {
+            return null
+        }
 
         val tag = calendar.getTag(oldTitle)
         calendar.removeTag(oldTitle)
@@ -206,21 +239,29 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?, startingF
         return tag
     }
 
-    fun addToTag(title: String, forbiddenTimeInterval: Pair<Pair<Int, Int>, Pair<Int, Int>>? = null,
-                        preferredTimeInterval: Pair<Pair<Int, Int>, Pair<Int, Int>>? = null): PlannerTag? {
-        if (!calendar.containsTag(title)){ return null}
+    fun addToTag(
+        title: String, forbiddenTimeInterval: Pair<Pair<Int, Int>, Pair<Int, Int>>? = null,
+        preferredTimeInterval: Pair<Pair<Int, Int>, Pair<Int, Int>>? = null
+    ): PlannerTag? {
+        if (!calendar.containsTag(title)) {
+            return null
+        }
         val tag = calendar.getTag(title)
-        for (pair in turnTimesIntoDates(listOfNotNull(forbiddenTimeInterval))){
+        for (pair in turnTimesIntoDates(listOfNotNull(forbiddenTimeInterval))) {
             tag.addForbiddenTimeInterval(pair.first, pair.second)
         }
 
-        for (pair in turnTimesIntoDates(listOfNotNull(preferredTimeInterval))){
+        for (pair in turnTimesIntoDates(listOfNotNull(preferredTimeInterval))) {
             tag.addPreferredTimeInterval(pair.first, pair.second)
         }
         return tag
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
         Log.d(TAG, "Permissions granted, calling communicator to add events")
         addEventsToCalendar()
     }

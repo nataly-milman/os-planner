@@ -2,11 +2,13 @@ package net.planner.planet;
 
 import com.brein.time.exceptions.IllegalTimeInterval;
 import com.brein.time.exceptions.IllegalTimePoint;
+import com.brein.time.timeintervals.collections.ListIntervalCollection;
 import com.brein.time.timeintervals.indexes.IntervalTree;
 import com.brein.time.timeintervals.indexes.IntervalTreeBuilder;
 import com.brein.time.timeintervals.intervals.IInterval;
 import com.brein.time.timeintervals.intervals.LongInterval;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -23,38 +25,38 @@ public class PlannerCalendar {
     private static final int SPACE_IN_MINUTES = 15;
     private static final int MIN_SPACE_IN_SECONDS = 1;
     private static final long MIN_SPACE_IN_MILLIS = MIN_SPACE_IN_SECONDS * 1000L;
-    public static final long SPACE_IN_MILLIS = SPACE_IN_MINUTES * 60000L;
+    public static final long RECOMMENDED_SPACE_IN_MILLIS = SPACE_IN_MINUTES * 60000L;
 
     // Fields
     private long startTime; // This calendar starts from this time (ms) and ends 30 days after it.
     private long spaceBetweenTasks;
-    private IntervalTree thisMonth;
+    private IntervalTree occupiedTree;
     private HashMap<String, PlannerTag> tags;
 
     // Constructors
     public PlannerCalendar() {
-        init(System.currentTimeMillis(), SPACE_IN_MILLIS, Collections.emptyList(), Collections.emptyList());
+        init(System.currentTimeMillis(), MIN_SPACE_IN_MILLIS, Collections.emptyList(), Collections.emptyList());
     }
 
     public PlannerCalendar(long timeInMillis) {
-        init(timeInMillis, SPACE_IN_MILLIS, Collections.emptyList(), Collections.emptyList());
+        init(timeInMillis, MIN_SPACE_IN_MILLIS, Collections.emptyList(), Collections.emptyList());
     }
 
     public PlannerCalendar(long timeInMillis, long spaceBetweenTasks) {
-        if (spaceBetweenTasks <= MIN_SPACE_IN_MILLIS) spaceBetweenTasks = SPACE_IN_MILLIS;
+        if (spaceBetweenTasks < MIN_SPACE_IN_MILLIS) spaceBetweenTasks = MIN_SPACE_IN_MILLIS;
 
         init(timeInMillis, spaceBetweenTasks, Collections.emptyList(), Collections.emptyList());
     }
 
     public PlannerCalendar(long timeInMillis, long spaceBetweenTasks, List<PlannerEvent> eventList) {
-        if (spaceBetweenTasks <= MIN_SPACE_IN_MILLIS) spaceBetweenTasks = SPACE_IN_MILLIS;
+        if (spaceBetweenTasks < MIN_SPACE_IN_MILLIS) spaceBetweenTasks = MIN_SPACE_IN_MILLIS;
         if (eventList == null) eventList = Collections.emptyList();
 
         init(timeInMillis, spaceBetweenTasks, eventList, Collections.emptyList());
     }
 
     public PlannerCalendar(long timeInMillis, long spaceBetweenTasks, List<PlannerEvent> eventList, List<PlannerTag> newTags) {
-        if (spaceBetweenTasks <= MIN_SPACE_IN_MILLIS) spaceBetweenTasks = SPACE_IN_MILLIS;
+        if (spaceBetweenTasks < MIN_SPACE_IN_MILLIS) spaceBetweenTasks = MIN_SPACE_IN_MILLIS;
         if (eventList == null) eventList = Collections.emptyList();
         if (newTags == null) newTags = Collections.emptyList();
 
@@ -74,12 +76,16 @@ public class PlannerCalendar {
         // Add tags.
         tags = new HashMap<>(tagList.size());
         for (PlannerTag tag : tagList) {
-            tags.put(tag.getTagName(), tag);
+            String tagName = tag.getTagName();
+            if (!tagName.equals(PlannerObject.NO_TAG)) {
+                tags.put(tagName, tag);
+            }
         }
 
         // Create occupiedTree and add events.
-        thisMonth = IntervalTreeBuilder.newBuilder()
-                                       .usePredefinedType(IntervalTreeBuilder.IntervalType.LONG).build();
+        occupiedTree = IntervalTreeBuilder.newBuilder()
+                .usePredefinedType(IntervalTreeBuilder.IntervalType.LONG)
+                .collectIntervals(interval -> new ListIntervalCollection()).build();
         for (PlannerEvent event : eventList) {
             insertEvent(event);
         }
@@ -90,7 +96,7 @@ public class PlannerCalendar {
 
     // Methods
     public Collection<IInterval> getCollisions(long startDate, long endDate) {
-        return thisMonth.overlap(new LongInterval(startDate, endDate));
+        return occupiedTree.overlap(new LongInterval(startDate, endDate));
     }
 
     public boolean isIntervalAvailable(long startDate, long endDate) {
@@ -98,7 +104,7 @@ public class PlannerCalendar {
     }
 
     public boolean isIntervalTaggedForbidden(String tagName, long startDate, long endDate) {
-        PlannerTag tag = tags.get(tagName);
+        PlannerTag tag = safeGetTag(tagName);
         if (tag == null) {
             return false;
         }
@@ -107,7 +113,7 @@ public class PlannerCalendar {
     }
 
     public boolean isIntervalTaggedPreferred(String tagName, long startDate, long endDate) {
-        PlannerTag tag = tags.get(tagName);
+        PlannerTag tag = safeGetTag(tagName);
         if (tag == null) {
             return false;
         }
@@ -121,7 +127,7 @@ public class PlannerCalendar {
         }
 
         OccupiedInterval toInsert = new OccupiedInterval(event);
-        return !thisMonth.contains(toInsert) && thisMonth.add(toInsert);
+        return !occupiedTree.contains(toInsert) && occupiedTree.add(toInsert);
     }
 
     public boolean forceInsertEvent(PlannerEvent event) {
@@ -130,7 +136,7 @@ public class PlannerCalendar {
         }
 
         OccupiedInterval toInsert = new OccupiedInterval(event);
-        return thisMonth.add(toInsert);
+        return occupiedTree.add(toInsert);
     }
 
     private long getSpacedStartTime(LongInterval interval) {
@@ -171,7 +177,8 @@ public class PlannerCalendar {
     }
 
     // todo add task splitting
-    private boolean insertUntaggedTaskHelper(PlannerTask task, Iterator<IInterval> possibleIterator) {
+    private LinkedList<PlannerEvent> insertUntaggedTaskHelper(PlannerTask task, Iterator<IInterval> possibleIterator) {
+        LinkedList<PlannerEvent> assignments = new LinkedList<>();
         long desiredDuration = task.getDurationInMillis() + spaceBetweenTasks;
 
         // Iterate over possible intervals.
@@ -184,13 +191,17 @@ public class PlannerCalendar {
             // Check if tagged interval is long enough.
             long possibleDuration = possibleInterval.getEnd() - startTime;
             if (possibleDuration >= desiredDuration) {
-                return thisMonth.add(new OccupiedInterval(task, startTime, startTime + desiredDuration));
+                PlannerEvent toAdd = new PlannerEvent(task, startTime, startTime + desiredDuration);
+                assignments.add(toAdd);
+                occupiedTree.add(new OccupiedInterval(toAdd));
+                return assignments;
             }
         }
-        return false;
+        return assignments;
     }
 
-    private boolean insertTaskHelper(PlannerTask task, Iterator<IInterval> possibleIterator, IntervalTree collisionTree) {
+    private LinkedList<PlannerEvent> insertTaskHelper(PlannerTask task, Iterator<IInterval> possibleIterator, IntervalTree collisionTree) {
+        LinkedList<PlannerEvent> assignments = new LinkedList<>();
         long desiredDuration = task.getDurationInMillis() + spaceBetweenTasks;
 
         // Iterate over possible intervals.
@@ -210,33 +221,39 @@ public class PlannerCalendar {
             Collection<IInterval> collisions = mergeOverlapping(collisionTree.overlap(possibleInterval));
             if (collisions.isEmpty()) {
                 // The tagged interval is free and its long enough so we can push here.
-                return thisMonth.add(new OccupiedInterval(task, startTime, startTime + desiredDuration));
+                PlannerEvent toAdd = new PlannerEvent(task, startTime, startTime + desiredDuration);
+                assignments.add(toAdd);
+                occupiedTree.add(new OccupiedInterval(toAdd));
+                return assignments;
             }
 
             //  Check if we can push task in between a pair of collision intervals.
             for (IInterval collision : collisions) {
-                OccupiedInterval toCheck = new OccupiedInterval(task, startTime, startTime + desiredDuration);
+                PlannerEvent possibleEvent = new PlannerEvent(task, startTime, startTime + desiredDuration);
+                OccupiedInterval toCheck = new OccupiedInterval(possibleEvent);
                 if (toCheck.irBefore(collision)) {
                     // Found free interval before some event/task so we can push here.
-                    return thisMonth.add(toCheck);
+                    assignments.add(possibleEvent);
+                    occupiedTree.add(toCheck);
+                    return assignments;
                 }
             }
         }
-        return false;
+        return assignments;
     }
 
-    public boolean preferredInsertTask(PlannerTask task) {
-        PlannerTag tag = tags.get(task.getTagName());
+    public List<PlannerEvent> preferredInsertTask(PlannerTask task) {
+        PlannerTag tag = safeGetTag(task.getTagName());
         if (tag == null) {
-            return false;
+            return new LinkedList<>();
         }
 
-        return insertTaskHelper(task, tag.getPreferredTimeIntervalsIterator(), thisMonth);
+        return insertTaskHelper(task, tag.getPreferredTimeIntervalsIterator(), occupiedTree);
     }
 
-    public boolean insertTask(PlannerTask task) {
+    public List<PlannerEvent> insertTask(PlannerTask task) {
         FreeTimeIterator freeTimeIt = new FreeTimeIterator();
-        PlannerTag tag = tags.get(task.getTagName());
+        PlannerTag tag = safeGetTag(task.getTagName());
         if (tag == null) {
             return insertUntaggedTaskHelper(task, freeTimeIt);
         }
@@ -244,14 +261,14 @@ public class PlannerCalendar {
         return insertTaskHelper(task, freeTimeIt, tag.getForbiddenTimeIntervalsTree());
     }
 
-    public boolean forceInsertTask(PlannerTask task) {
+    public List<PlannerEvent> forceInsertTask(PlannerTask task) {
         // todo implement
-        return false;
+        return new LinkedList<>();
     }
 
     public boolean removeEvent(PlannerEvent event) {
         OccupiedInterval toRemove = new OccupiedInterval(event);
-        return thisMonth.remove(toRemove);
+        return occupiedTree.remove(toRemove);
     }
 
     public boolean containsTag(String tagName) {
@@ -285,7 +302,22 @@ public class PlannerCalendar {
         return tags.get(tagName);
     }
 
+    public List<String> getTagNames() {
+        return new ArrayList<>(tags.keySet());
+    }
+
+    public List<PlannerTag> getTags() {
+        return new ArrayList<>(tags.values());
+    }
+
     // Helper functions
+    private PlannerTag safeGetTag(String tagName) {
+        if (tagName == null || tagName.equals(PlannerObject.NO_TAG)) {
+            return null;
+        }
+        return tags.get(tagName);
+    }
+
     private boolean isValidDate(long time) {
         long diffInMillis = time - startTime;
         return diffInMillis >= 0 &&
@@ -304,7 +336,8 @@ public class PlannerCalendar {
         private LongInterval nextOccupied;
 
         public FreeTimeIterator() {
-            occupiedIt = thisMonth.iterator();
+
+            occupiedIt = occupiedTree.iterator();
             startTime = PlannerCalendar.this.startTime + spaceBetweenTasks;
 
             if (occupiedIt.hasNext()) {
@@ -359,21 +392,16 @@ public class PlannerCalendar {
 
     private static class OccupiedInterval extends LongInterval {
 
-        public PlannerObject object;
+        public PlannerEvent event;
 
         public OccupiedInterval() {
             super();
-            this.object = null;
+            event = null;
         }
 
         public OccupiedInterval(PlannerEvent event) throws IllegalTimeInterval, IllegalTimePoint {
             super(event.getStartTime(), event.getStartTime(), false, false);
-            this.object = event;
-        }
-
-        public OccupiedInterval(PlannerTask task, long startDate, long endDate) throws IllegalTimeInterval, IllegalTimePoint {
-            super(startDate, endDate, false, false);
-            this.object = task;
+            this.event = event;
         }
 
         @Override
@@ -382,7 +410,7 @@ public class PlannerCalendar {
             if (o == null || getClass() != o.getClass()) return false;
             if (!super.equals(o)) return false;
             OccupiedInterval that = (OccupiedInterval) o;
-            return object.equals(that.object);
+            return event.equals(that.event);
         }
     }
 

@@ -1,7 +1,5 @@
 package net.planner.planet;
 
-import junit.framework.TestCase;
-
 import org.junit.Assert;
 import org.junit.Test;
 

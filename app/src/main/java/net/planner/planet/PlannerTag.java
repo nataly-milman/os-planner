@@ -2,6 +2,7 @@ package net.planner.planet;
 
 import android.util.Log;
 
+import com.brein.time.timeintervals.collections.ListIntervalCollection;
 import com.brein.time.timeintervals.indexes.IntervalTree;
 import com.brein.time.timeintervals.indexes.IntervalTreeBuilder;
 import com.brein.time.timeintervals.intervals.IInterval;
@@ -24,9 +25,11 @@ public class PlannerTag {
     public PlannerTag(String tagName) {
         this.tagName = tagName;
         this.forbiddenTimeIntervals = IntervalTreeBuilder.newBuilder()
-                .usePredefinedType(IntervalTreeBuilder.IntervalType.LONG).build();
+                .usePredefinedType(IntervalTreeBuilder.IntervalType.LONG)
+                .collectIntervals(interval -> new ListIntervalCollection()).build();
         this.preferredTimeIntervals = IntervalTreeBuilder.newBuilder()
-                .usePredefinedType(IntervalTreeBuilder.IntervalType.LONG).build();
+                .usePredefinedType(IntervalTreeBuilder.IntervalType.LONG)
+                .collectIntervals(interval -> new ListIntervalCollection()).build();
     }
 
     public String getTagName() {
