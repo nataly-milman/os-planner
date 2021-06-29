@@ -19,8 +19,8 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?, startingF
     @SuppressLint("SimpleDateFormat")
     private val formatter = SimpleDateFormat("H:mm MM/dd/yyyy")
     init {
-        if (calendarStartTime < 0){
-            throw IllegalArgumentException("Error setting up user calendar - invalid start datetime, cannot be before " +
+        if (calendarStartTime >= 0){
+            Log.e(TAG,"Error setting up user calendar - invalid start datetime, cannot be before " +
                     "Thu Jan 01, 1970")
         }
         calendar = PlannerCalendar(calendarStartTime)
@@ -58,7 +58,11 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?, startingF
     @JvmOverloads
     fun addEvent(title: String = "", startTime: Long, endTime: Long,
                  isAllDay : Boolean = false, canBeScheduledOver : Boolean = true,
-                 description: String = "", location: String = "", tagName: String = "NoTag"): PlannerEvent {
+                 description: String = "", location: String = "", tagName: String = "NoTag",
+                 reminder : Int = -1): PlannerEvent? {
+        if (!PlannerEvent.isValid(reminder, startTime, endTime)){
+            return null
+        }
         if (tagName != "NoTag" && !calendar.containsTag(tagName)) {
             calendar.addTag(PlannerTag(tagName))
         }
@@ -78,14 +82,15 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?, startingF
 
     private fun createEvent(title: String = "", startTime: Long, endTime: Long,
                             isAllDay : Boolean = false, canBeScheduledOver : Boolean = true,
-                            description: String = "", location: String = "", tagName: String = "NoTag") : PlannerEvent {
+                            description: String = "", location: String = "", tagName: String = "NoTag",
+                            reminder : Int = -1) : PlannerEvent {
         // private function, the validity checks are performed in addEvent
         val event = PlannerEvent(title, startTime, endTime)
         event.setLocation(location)
         event.tagName = tagName
         event.isExclusiveForItsTimeSlot = canBeScheduledOver
         event.setAllDay(isAllDay)
-
+        event.setReminder(reminder)
         event.setDescription(description)
 
         if (isAllDay){
@@ -118,7 +123,13 @@ class PlannerManager(syncGoogleCalendar: Boolean, activity: Activity?, startingF
 
     @JvmOverloads
     fun addTask(title: String, deadlineTimeMillis: Long, durationInMinutes: Int, tagName: String = "NoTag",
-                priority: Int = 9, location: String = ""): PlannerTask {
+                priority: Int = 9, location: String = "", maxSessionTimeInMinutes: Int = 60,
+                maxDivisionsNumber: Int = 1, reminder: Int = -1): PlannerTask? {
+        if (!PlannerTask.isValid(reminder, priority, deadlineTimeMillis, durationInMinutes,
+            maxSessionTimeInMinutes,maxDivisionsNumber)){
+            return null
+        }
+
         val task = createTask(title, deadlineTimeMillis, durationInMinutes, tagName, priority, location)
         val insertedTask = PlannerSolver.addTask(task, calendar)
 

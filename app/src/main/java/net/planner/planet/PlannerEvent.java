@@ -32,6 +32,24 @@ public class PlannerEvent extends PlannerObject {
         this.eventId = -1L;
         this.isAllDay = false; // @TODO check duration?
     }
+    // validity check
+    public static boolean isValid(int reminder, long startTime, long endTime) {
+        if (!PlannerObject.isValid(reminder)) {
+            return false;
+        }
+
+        if (startTime < 0 || endTime < 0 ) {
+            Log.e(TAG,"Validation error: Illegal time value");
+            return false;
+        }
+
+        if (startTime > endTime) {
+            Log.e(TAG,"Validation error: Event cannot end before it starts");
+            return false;
+        }
+
+        return true;
+    }
 
     // methods
     public long getStartTime() {

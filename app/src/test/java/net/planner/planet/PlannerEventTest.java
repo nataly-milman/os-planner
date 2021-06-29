@@ -26,7 +26,7 @@ public class PlannerEventTest {
         assert date2 != null;
         PlannerEvent pe = new PlannerEvent("New event", date1.getTime(), date2.getTime());
         Assert.assertNotNull(pe);
-        Assert.assertEquals("Title: New event; Priority: 5/10; Tagged: NoTag; Exclusive for this time slot;" +
+        Assert.assertEquals("Title: New event; Tagged: NoTag; Exclusive for this time slot;" +
                         " Starts at Sun May 16 06:00:00 IDT 2021; Ends at Sun May 16 18:00:00 IDT 2021.",
                 pe.toString());
     }
@@ -60,9 +60,6 @@ public class PlannerEventTest {
         // reminder
         pe.setReminder(-10);
         Assert.assertEquals(-1, pe.getReminder());
-        // priority
-        Assert.assertFalse(pe.setPriority(0));
-        Assert.assertFalse(pe.getPriority() < 1);
     }
 
     @Test
@@ -83,5 +80,16 @@ public class PlannerEventTest {
 
         Assert.assertFalse(pe.setEndTime(date2));
         Assert.assertNotEquals(pe.getEndTime(), date2); //can't set end before start
+    }
+
+
+    @Test
+    public void testValidity() {
+        long date1 = 1021950123449L;
+        long date2 = 1621956543086L;
+        Assert.assertFalse(PlannerEvent.isValid(-10, date2, date2));
+        Assert.assertFalse(PlannerEvent.isValid(-1, date2, date1));
+        Assert.assertTrue(PlannerEvent.isValid(-1, date2, date2));
+        Assert.assertTrue(PlannerEvent.isValid(-1, date1, date2));
     }
 }

@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 
 abstract class PlannerObject {
+    private static final String TAG = "PlannerObject";
     protected static final String NO_TITLE = "(No title)";
     protected String title;
     protected String description;
@@ -14,7 +15,6 @@ abstract class PlannerObject {
 
     protected String location; // string for now
     protected int reminder; // N minutes before (or some set values as in GC)
-    protected int priority; //1-10
     protected String tag;
 
     //constructors
@@ -27,9 +27,18 @@ abstract class PlannerObject {
         this.description = "";
         this.location = ""; // for now string
         this.reminder = -1;
-        this.priority = 5;
         this.tag = "NoTag";
         this.exclusiveForItsTimeSlot = true;
+    }
+
+    // validity check
+    public static boolean isValid(int reminder) {
+        // title, description, location, exclusiveForItsTimeSlot - no predefined ranges
+        if (reminder < -1){
+            Log.e(TAG, "Validation error: Reminder is the number of minutes, -1 for no reminder");
+            return false;
+        }
+        return true;
     }
 
     // methods
@@ -73,19 +82,6 @@ abstract class PlannerObject {
         }
     }
 
-    public int getPriority() {
-        return priority;
-    }
-
-    public boolean setPriority(int priority) {
-        if (priority < 1 || priority > 10) {
-            Log.e("PlannerObject", "Illegal priority: Priority is integer from 1 to 10");
-            return false;
-        }
-        this.priority = priority;
-        return true;
-    }
-
     public String getTagName() {
         return tag;
     }
@@ -113,9 +109,6 @@ abstract class PlannerObject {
         if (this.reminder != -1) {
             stringRep += "; Remind before: " + this.reminder + " minutes";
         }
-        if (this.priority != -1) {
-            stringRep += "; Priority: " + this.priority + "/10";
-        }
         if (this.tag != null) {
             stringRep += "; Tagged: " + this.tag;
         }
@@ -137,7 +130,7 @@ abstract class PlannerObject {
         PlannerObject that = (PlannerObject) o;
         return isExclusiveForItsTimeSlot() == that
                 .isExclusiveForItsTimeSlot() && getReminder() == that
-                .getReminder() && getPriority() == that.getPriority() && getTitle()
+                .getReminder() && getTitle()
                        .equals(that.getTitle()) && getDescription()
                        .equals(that.getDescription()) && getLocation()
                        .equals(that.getLocation()) && getTagName().equals(that.getTagName());
@@ -145,6 +138,6 @@ abstract class PlannerObject {
 
     @Override public int hashCode() {
         return Objects
-                .hash(getTitle(), getDescription(), isExclusiveForItsTimeSlot(), getLocation(), getReminder(), getPriority(), getTagName());
+                .hash(getTitle(), getDescription(), isExclusiveForItsTimeSlot(), getLocation(), getReminder(), getTagName());
     }
 }
