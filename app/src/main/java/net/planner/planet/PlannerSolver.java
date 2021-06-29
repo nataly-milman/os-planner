@@ -34,12 +34,12 @@ public class PlannerSolver {
         return sortedTasks;
     }
 
-    public static List<PlannerTask> addTasks(List<PlannerTask> tasks, PlannerCalendar calendar) {
-        LinkedList<PlannerTask> addedTasks = new LinkedList<>();
+    public static List<List<PlannerEvent>> addTasks(List<PlannerTask> tasks, PlannerCalendar calendar) {
+        LinkedList<List<PlannerEvent>> addedTasks = new LinkedList<>();
         for (PlannerTask task : sortTasks(tasks, calendar)) {
-            PlannerTask addedTask = addTask(task, calendar);
-            if (addedTask != null) {
-                addedTasks.add(addedTask);
+            List<PlannerEvent> addedTaskEvents = addTask(task, calendar);
+            if (!addedTaskEvents.isEmpty()) {
+                addedTasks.add(addedTaskEvents);
             } else {
                 // stop addition because one of the events couldn't be added
                 break;
@@ -48,11 +48,13 @@ public class PlannerSolver {
         return addedTasks;
     }
 
-    public static PlannerTask addTask(PlannerTask task, PlannerCalendar calendar) {
-        // TODO the return value can be the list of events for each task
-        if (calendar.insertTask(task)) {  //TODO all insertion logic here
-            return task;
-        }
-        return null;
+    public static List<PlannerEvent> addTask(PlannerTask task, PlannerCalendar calendar) {
+        List<PlannerEvent> addedEvents = calendar.insertTask(task);
+        return addedEvents;
+
+        //if (!addedEvents.isEmpty()) {  //TODO all insertion logic here
+        //    return addedEvents;
+        //}
+        //return null;
     }
 }

@@ -11,6 +11,7 @@ public class PlannerEvent extends PlannerObject {
     private long endTime;
     private long eventId;
     private boolean isAllDay;
+    private final PlannerTask parentTask;
 
     // constructors
     public PlannerEvent(String title, long startTime, long endTime) {
@@ -20,6 +21,17 @@ public class PlannerEvent extends PlannerObject {
         this.endTime = endTime;
         this.eventId = -1L;
         this.isAllDay = false; // @TODO check duration?
+        this.parentTask = null;
+    }
+
+    public PlannerEvent(PlannerTask task, long startTime, long endTime) {
+        super(task.title);
+        this.title = task.title;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.eventId = -1L;
+        this.isAllDay = false; // @TODO check duration?
+        this.parentTask = task;
     }
 
     // methods
@@ -56,6 +68,9 @@ public class PlannerEvent extends PlannerObject {
         this.isAllDay = isAllDay;
     }
 
+    public final PlannerTask getParentTask() {
+        return parentTask;
+    }
 
     @NotNull
     @Override
@@ -78,7 +93,9 @@ public class PlannerEvent extends PlannerObject {
             return false;
         }
         PlannerEvent that = (PlannerEvent) o;
-        return getStartTime() == that.getStartTime() && getEndTime() == that.getEndTime();
+
+        boolean doesParentTaskMatch = parentTask == that.parentTask || parentTask.equals(that.parentTask);
+        return doesParentTaskMatch && getStartTime() == that.getStartTime() && getEndTime() == that.getEndTime();
     }
 
     @Override
