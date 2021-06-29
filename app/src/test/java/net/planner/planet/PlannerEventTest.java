@@ -26,7 +26,7 @@ public class PlannerEventTest {
         assert date2 != null;
         PlannerEvent pe = new PlannerEvent("New event", date1.getTime(), date2.getTime());
         Assert.assertNotNull(pe);
-        Assert.assertEquals("Title: New event; Priority: 5/10; Exclusive for this time slot;" +
+        Assert.assertEquals("Title: New event; Priority: 5/10; Tagged: NoTag; Exclusive for this time slot;" +
                         " Starts at Sun May 16 06:00:00 IDT 2021; Ends at Sun May 16 18:00:00 IDT 2021.",
                 pe.toString());
     }
@@ -47,10 +47,7 @@ public class PlannerEventTest {
         pe.setTitle(null);
         Assert.assertNotNull(pe.getTitle());
         // check end
-        try {
-            pe.setEndTime(date3); // set end before start
-        } catch (IllegalArgumentException ignored) {
-        }
+        Assert.assertFalse(pe.setEndTime(date3)); // set end before start
         Assert.assertFalse(pe.getEndTime() < pe.getStartTime());  // NOT end before start
         // reset to a valid config
         pe.setStartTime(date3);
@@ -64,10 +61,7 @@ public class PlannerEventTest {
         pe.setReminder(-10);
         Assert.assertEquals(-1, pe.getReminder());
         // priority
-        try {
-            pe.setPriority(0);
-        } catch (IllegalArgumentException ignored) {
-        }
+        Assert.assertFalse(pe.setPriority(0));
         Assert.assertFalse(pe.getPriority() < 1);
     }
 
@@ -87,10 +81,7 @@ public class PlannerEventTest {
         pe.setStartTime(newStart);
         Assert.assertEquals(expectedEnd, pe.getEndTime());  // change start = move event
 
-        try {
-            pe.setEndTime(date2);
-        } catch (IllegalArgumentException ignored) {
-        }
+        Assert.assertFalse(pe.setEndTime(date2));
         Assert.assertNotEquals(pe.getEndTime(), date2); //can't set end before start
     }
 }

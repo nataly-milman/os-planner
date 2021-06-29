@@ -1,10 +1,13 @@
 package net.planner.planet;
 
+import android.util.Log;
+
 import com.brein.time.timeintervals.indexes.IntervalTree;
 import com.brein.time.timeintervals.indexes.IntervalTreeBuilder;
 import com.brein.time.timeintervals.intervals.IInterval;
 import com.brein.time.timeintervals.intervals.LongInterval;
 
+import java.sql.Struct;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -12,6 +15,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class PlannerTag {
+    private static final String TAG = "PlannerTag";
     private String tagName;
     private IntervalTree forbiddenTimeIntervals;
     private IntervalTree preferredTimeIntervals;
@@ -37,12 +41,13 @@ public class PlannerTag {
         return priority;
     }
 
-    public void setPriority(int priority) {
+    public boolean setPriority(int priority) {
         if (priority < 1 || priority > 10) {
-            throw new IllegalArgumentException(
-                    "Illegal priority: Priority is integer from 1 to 10");
+            Log.e(TAG,"Illegal priority: Priority is integer from 1 to 10");
+            return false;
         }
         this.priority = priority;
+        return true;
     }
 
     public List<IInterval> getForbiddenTimeIntervals() {
@@ -57,12 +62,13 @@ public class PlannerTag {
         return forbiddenTimeIntervals;
     }
 
-    public void addForbiddenTimeInterval(long from, long until) {
+    public boolean addForbiddenTimeInterval(long from, long until) {
         if (until < from) {
-            throw new IllegalArgumentException(
-                    "Illegal time interval: Event cannot end before it starts");
+            Log.e(TAG,"Illegal time interval: Event cannot end before it starts");
+            return false;
         }
         this.forbiddenTimeIntervals.add(new LongInterval(from, until));
+        return true;
     }
 
     public List<IInterval> getPreferredTimeIntervals() {
@@ -77,12 +83,13 @@ public class PlannerTag {
         return preferredTimeIntervals;
     }
 
-    public void addPreferredTimeInterval(long from, long until) {
+    public boolean addPreferredTimeInterval(long from, long until) {
         if (until < from) {
-            throw new IllegalArgumentException(
-                    "Illegal time interval: Event cannot end before it starts");
+            Log.e(TAG,"Illegal time interval: Event cannot end before it starts");
+            return false;
         }
         this.preferredTimeIntervals.add(new LongInterval(from, until));
+        return true;
     }
 
     public Collection<?> getForbiddenCollisions(long startDate, long endDate) {

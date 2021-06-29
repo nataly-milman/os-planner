@@ -22,7 +22,7 @@ public class PlannerTaskTest {
         }
         PlannerTask pt = new PlannerTask("New task", deadline, 30);
         Assert.assertNotNull(pt);
-        Assert.assertEquals("Title: New task; Priority: 5/10; Exclusive for this time slot;" +
+        Assert.assertEquals("Title: New task; Priority: 5/10; Tagged: NoTag; Exclusive for this time slot;" +
                 " Deadline is Sun May 16 06:00:00 IDT 2021; " +
                 "Maximal time of one session (if divided) is 1440; " +
                 "Maximal number of divisions (if divided) is 1.", pt.toString());

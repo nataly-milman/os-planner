@@ -1,6 +1,7 @@
 package net.planner.planet;
 
 import android.icu.util.DateInterval;
+import android.util.Log;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -12,6 +13,7 @@ import java.util.Objects;
 
 
 public class PlannerEvent extends PlannerObject {
+    private static final String TAG = "PlannerEvent";
     private long startTime;
     private long endTime;
     private long eventId;
@@ -20,6 +22,10 @@ public class PlannerEvent extends PlannerObject {
     // constructors
     public PlannerEvent(String title, long startTime, long endTime) {
         super(title);
+        if (endTime < startTime) {
+            Log.e(TAG,"Illegal time interval: Event cannot end before it starts");
+            return;
+        }
         this.title = title;
         this.startTime = startTime;
         this.endTime = endTime;
@@ -32,25 +38,28 @@ public class PlannerEvent extends PlannerObject {
         return startTime;
     }
 
-    public void setStartTime(long startTime) {
+    public boolean setStartTime(long startTime) {
         if (startTime < 0) {
-            throw new IllegalArgumentException("Illegal start time: Time cannot be negative");
+            Log.e(TAG,"Illegal start time: Time cannot be negative");
+            return false;
         }
         long duration = this.endTime - this.startTime;
         this.startTime = startTime;
         this.endTime = startTime + duration;
+        return true;
     }
 
     public long getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(long endTime) {
+    public boolean setEndTime(long endTime) {
         if (this.startTime > endTime) {
-            throw new IllegalArgumentException(
-                    "Illegal end time: Event cannot end before it starts");
+            Log.e(TAG,"Illegal end time: Event cannot end before it starts");
+            return false;
         }
         this.endTime = endTime;
+        return true;
     }
 
     public void setEventId(long eventId) {

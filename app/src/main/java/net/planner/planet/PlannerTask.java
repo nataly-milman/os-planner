@@ -4,8 +4,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Date;
 import java.util.Objects;
+import android.util.Log;
 
 public class PlannerTask extends PlannerObject {
+    private static final String TAG = "PlannerTask";
+
     private long deadline;
     private int maxSessionTimeInMinutes;
     private int maxDivisionsNumber;
@@ -14,10 +17,12 @@ public class PlannerTask extends PlannerObject {
     public PlannerTask(String title, long deadline, int durationInMinutes) {
         super(title);
         if (deadline < 0) {
-            throw new IllegalArgumentException("Invalid deadline");
+            Log.e(TAG,"Invalid deadline");
+            return;
         }
         if (durationInMinutes <= 0) {
-            throw new IllegalArgumentException("Invalid duration");
+            Log.e(TAG,"Invalid duration");
+            return;
         }
         this.deadline = deadline;
         this.maxSessionTimeInMinutes = 24 * 60; //1 day as a default
@@ -25,29 +30,40 @@ public class PlannerTask extends PlannerObject {
         this.durationInMinutes = durationInMinutes;
     }
 
-
     public long getDeadline() {
         return deadline;
     }
 
-    public void setDeadline(long deadline) {
+    public boolean setDeadline(long deadline) {
+        if (deadline < 0) {
+            Log.e(TAG,"Invalid deadline");
+            return false;
+        }
         this.deadline = deadline;
+        return true;
     }
 
     public int getMaxSessionTimeInMinutes() {
         return maxSessionTimeInMinutes;
     }
 
-    public void setMaxSessionTimeInMinutes(int maxSessionTimeInMinutes) {
+    public boolean setMaxSessionTimeInMinutes(int maxSessionTimeInMinutes) {
+        // TODO define defaults
         this.maxSessionTimeInMinutes = maxSessionTimeInMinutes;
+        return true;
     }
 
     public int getMaxDivisionsNumber() {
         return maxDivisionsNumber;
     }
 
-    public void setMaxDivisionsNumber(int maxDivisionsNumber) {
+    public boolean setMaxDivisionsNumber(int maxDivisionsNumber) {
+        if (maxDivisionsNumber < 1) {
+            Log.e(TAG,"At least one instance of task should be allowed");
+            return false;
+        }
         this.maxDivisionsNumber = maxDivisionsNumber;
+        return true;
     }
 
     public long getDurationInMinutes() {
@@ -58,8 +74,13 @@ public class PlannerTask extends PlannerObject {
         return durationInMinutes * 60000L;
     }
 
-    public void setDurationInMinutes(int durationInMinutes) {
+    public boolean setDurationInMinutes(int durationInMinutes) {
+        if (durationInMinutes < 0) {
+            Log.e(TAG,"Invalid task duration");
+            return false;
+        }
         this.durationInMinutes = durationInMinutes;
+        return true;
     }
 
     @NotNull

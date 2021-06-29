@@ -1,8 +1,9 @@
 package net.planner.planet;
 
+import android.util.Log;
+
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Date;
 import java.util.Objects;
 
 abstract class PlannerObject {
@@ -76,12 +77,13 @@ abstract class PlannerObject {
         return priority;
     }
 
-    public void setPriority(int priority) {
+    public boolean setPriority(int priority) {
         if (priority < 1 || priority > 10) {
-            throw new IllegalArgumentException(
-                    "Illegal priority: Priority is integer from 1 to 10");
+            Log.e("PlannerObject", "Illegal priority: Priority is integer from 1 to 10");
+            return false;
         }
         this.priority = priority;
+        return true;
     }
 
     public String getTagName() {
@@ -100,9 +102,7 @@ abstract class PlannerObject {
         this.exclusiveForItsTimeSlot = exclusiveForItsTimeSlot;
     }
 
-    @NotNull
-    @Override
-    public String toString() {
+    @NotNull @Override public String toString() {
         String stringRep = "Title: " + this.title;
         if (!this.description.isEmpty()) {
             stringRep += "; Description: " + this.description;
@@ -127,8 +127,7 @@ abstract class PlannerObject {
         return stringRep;
     }
 
-    @Override
-    public boolean equals(Object o) {
+    @Override public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
@@ -136,17 +135,16 @@ abstract class PlannerObject {
             return false;
         }
         PlannerObject that = (PlannerObject) o;
-        return isExclusiveForItsTimeSlot() == that.isExclusiveForItsTimeSlot() &&
-                getReminder() == that.getReminder() && getPriority() == that.getPriority() &&
-                getTitle().equals(that.getTitle()) &&
-                getDescription().equals(that.getDescription()) &&
-                getLocation().equals(that.getLocation()) && getTagName().equals(that.getTagName());
+        return isExclusiveForItsTimeSlot() == that
+                .isExclusiveForItsTimeSlot() && getReminder() == that
+                .getReminder() && getPriority() == that.getPriority() && getTitle()
+                       .equals(that.getTitle()) && getDescription()
+                       .equals(that.getDescription()) && getLocation()
+                       .equals(that.getLocation()) && getTagName().equals(that.getTagName());
     }
 
-    @Override
-    public int hashCode() {
+    @Override public int hashCode() {
         return Objects
-                .hash(getTitle(), getDescription(), isExclusiveForItsTimeSlot(), getLocation(),
-                        getReminder(), getPriority(), getTagName());
+                .hash(getTitle(), getDescription(), isExclusiveForItsTimeSlot(), getLocation(), getReminder(), getPriority(), getTagName());
     }
 }
