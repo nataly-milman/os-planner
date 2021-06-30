@@ -10,7 +10,7 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import net.planner.exampleapp.databinding.ActivityAddTaskBinding
-import net.planner.planet.PlannerManager
+import net.planner.planet.PlannerMediator
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -36,7 +36,7 @@ class AddTaskActivity : AppCompatActivity() {
     }
 
     private lateinit var mBinding: ActivityAddTaskBinding
-    private lateinit var manager: PlannerManager
+    private lateinit var mediator: PlannerMediator
 
     private var widgetId: Int = 0
     private var numDaysShifted: Int = 0
@@ -110,7 +110,7 @@ class AddTaskActivity : AppCompatActivity() {
         }
 
         // Initialise our PlannerManager
-        manager = PlannerManager(true, this, System.currentTimeMillis())
+        mediator = PlannerMediator(true, this, System.currentTimeMillis())
     }
 
     private fun turnTimeToString(hour: Int, minutes: Int) : String {
@@ -151,7 +151,7 @@ class AddTaskActivity : AppCompatActivity() {
         deadlineDate.set(year, month, day, hour, minute)
 
         // Create the task and add to google calendar
-        manager.addTask(titleInput, deadlineDate.timeInMillis, durationMinutes)
+        mediator.addTask(titleInput, deadlineDate.timeInMillis, durationMinutes)
 
         // send Intent to activate Widget
         val resultValue = Intent()
