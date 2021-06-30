@@ -87,7 +87,7 @@ class PlannerMediator(syncGoogleCalendar: Boolean, activity: Activity?, starting
         // If this is a synced calendar, should be added to the users google calendar
         if (this.shouldSync) {
             Log.d(TAG, "addEvent: Adding created event to google calendar, default calendar")
-            val id = communicator?.insertEvent(callerActivity?.contentResolver, event)?.let {
+            val id = communicator?.insertEvent(callerActivity, event)?.let {
                 event.setEventId(it)
             }
         }
@@ -160,7 +160,7 @@ class PlannerMediator(syncGoogleCalendar: Boolean, activity: Activity?, starting
             event.setLocation(location)
             event.tagName = tagName
 
-            val id = communicator?.insertEvent(callerActivity?.contentResolver, event)?.let {
+            val id = communicator?.insertEvent(callerActivity, event)?.let {
                 event.setEventId(it)
             }
         }
