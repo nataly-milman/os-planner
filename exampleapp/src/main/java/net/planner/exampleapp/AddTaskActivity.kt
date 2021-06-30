@@ -31,6 +31,7 @@ class AddTaskActivity : AppCompatActivity() {
             val intent = Intent(context, AddTaskActivity::class.java)
             intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
             intent.putExtra(DAYS_SHIFTED_ID, daysShifted)
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
             return intent
         }
     }
