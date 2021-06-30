@@ -423,8 +423,9 @@ public class PlannerCalendar {
     private class FreeTimeIterator implements Iterator<IInterval> {
 
         private final Iterator<IInterval> occupiedIt;
-        private long startTime;
+        private long startTime, lastEndTime;
         private LongInterval nextOccupied;
+        private boolean oneMore;
 
         /**
          * Constructor for this iterator. Generates free time from the enclosing class' Interval Tree.
@@ -434,9 +435,11 @@ public class PlannerCalendar {
             occupiedIt = occupiedTree.iterator();
             startTime = PlannerCalendar.this.startTime + spaceBetweenTasks;
 
+            oneMore = true;
             if (occupiedIt.hasNext()) {
                 nextOccupied = (LongInterval) occupiedIt.next();
             } else {
+                lastEndTime = startTime;
                 nextOccupied = null;
             }
         }
@@ -446,7 +449,7 @@ public class PlannerCalendar {
          */
         @Override
         public boolean hasNext() {
-            return nextOccupied != null;
+            return nextOccupied != null || oneMore;
         }
 
         // On-the-fly interval merging
@@ -458,6 +461,7 @@ public class PlannerCalendar {
             LongInterval previous = nextOccupied;
             if (!occupiedIt.hasNext()) {
                 nextOccupied = null;
+                lastEndTime = previous.getEnd() + spaceBetweenTasks;
                 return previous;
             }
 
@@ -479,6 +483,14 @@ public class PlannerCalendar {
         @Override
         public IInterval next() {
             while (true) {
+                if (nextOccupied == null) {
+                    if (oneMore) {
+                        oneMore = false;
+                        return new LongInterval(lastEndTime, PlannerCalendar.this.startTime + TimeUnit.DAYS.toMillis(MAX_DAYS));
+                    }
+                    return null;
+                }
+
                 LongInterval current = getNextOccupied();
                 if (current == null) {
                     return null;
