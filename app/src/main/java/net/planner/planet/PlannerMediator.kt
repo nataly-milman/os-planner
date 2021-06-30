@@ -121,7 +121,8 @@ class PlannerMediator(syncGoogleCalendar: Boolean, activity: Activity?, starting
     @JvmOverloads
     fun createTask(
         title: String, deadlineTimeMillis: Long, durationInMinutes: Int, tagName: String = "NoTag",
-        priority: Int = 5, location: String = ""
+        priority: Int = 5, location: String = "", maxSessionTimeInMinutes: Int = 60,
+        maxDivisionsNumber: Int = 1, reminder: Int = -1
     ): PlannerTask {
         if (tagName != "NoTag" && !calendar.containsTag(tagName)) {
             calendar.addTag(PlannerTag(tagName))
@@ -130,6 +131,9 @@ class PlannerMediator(syncGoogleCalendar: Boolean, activity: Activity?, starting
         task.setPriority(priority)
         task.setLocation(location)
         task.tagName = tagName
+        task.maxSessionTimeInMinutes = maxSessionTimeInMinutes
+        task.maxDivisionsNumber = maxDivisionsNumber
+        task.reminder = reminder
         return task
     }
 
@@ -143,7 +147,8 @@ class PlannerMediator(syncGoogleCalendar: Boolean, activity: Activity?, starting
             return null
         }
 
-        val task = createTask(title, deadlineTimeMillis, durationInMinutes, tagName, priority, location)
+        val task = createTask(title, deadlineTimeMillis, durationInMinutes, tagName, priority, location,
+            maxSessionTimeInMinutes, maxDivisionsNumber, reminder)
         val insertedEvents = PlannerSolver.addTask(task, calendar)
         if (insertedEvents.isNotEmpty() && this.shouldSync) {
             Log.d(TAG, "addEvent: Adding created event to google calendar, default calendar")
