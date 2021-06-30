@@ -48,6 +48,7 @@ class PlannerMediator(syncGoogleCalendar: Boolean, activity: Activity?, starting
         }
     }
 
+    /** Add events from the Google Calendar to PlannerCalendar**/
     private fun addEventsToCalendar() {
         val strongActivity: Activity = callerActivity ?: return
         val events = communicator?.getUserEvents(strongActivity, calendarStartTime)
@@ -59,6 +60,7 @@ class PlannerMediator(syncGoogleCalendar: Boolean, activity: Activity?, starting
         }
     }
 
+    /** Add PlannerEvent created from the given parameters to the calendar **/
     @SuppressLint("SimpleDateFormat")
     @JvmOverloads
     fun addEvent(title: String = "", startTime: Long, endTime: Long,
@@ -94,7 +96,7 @@ class PlannerMediator(syncGoogleCalendar: Boolean, activity: Activity?, starting
         return event
     }
 
-
+    /** Create a PlannerEvent object out of its parameters **/
     private fun createEvent(title: String = "", startTime: Long, endTime: Long,
                             isAllDay : Boolean = false, canBeScheduledOver : Boolean = true,
                             description: String = "", location: String = "", tagName: String = "NoTag",
@@ -107,26 +109,15 @@ class PlannerMediator(syncGoogleCalendar: Boolean, activity: Activity?, starting
         event.setAllDay(isAllDay)
         event.setReminder(reminder)
         event.setDescription(description)
-
-        if (isAllDay) {
-            var date = (Calendar.getInstance().apply { timeInMillis = startTime })
-            val newStartDate = SimpleDateFormat("MM/dd/yyyy").format(date.time)
-            event.startTime = formatter.parse("0:0 $newStartDate").time
-
-            date = (Calendar.getInstance().apply {
-                timeInMillis = startTime
-            })
-            val newEndDate = SimpleDateFormat("MM/dd/yyyy").format(date.time)
-            event.endTime = formatter.parse("23:59 $newEndDate").time
-        }
-
         return event
     }
 
+    /** Remove a PlannerEvent object from the calendar **/
     fun removeEvent(event: PlannerEvent) {
         calendar.removeEvent(event)
     }
 
+    /** Create a PlannerTask object out of its parameters **/
     @JvmOverloads
     fun createTask(
         title: String, deadlineTimeMillis: Long, durationInMinutes: Int, tagName: String = "NoTag",
@@ -142,6 +133,7 @@ class PlannerMediator(syncGoogleCalendar: Boolean, activity: Activity?, starting
         return task
     }
 
+    /** Add the instances of the PlannerTask created by its parameters to the calendar **/
     @JvmOverloads
     fun addTask(title: String, deadlineTimeMillis: Long, durationInMinutes: Int, tagName: String = "NoTag",
                 priority: Int = 9, location: String = "", maxSessionTimeInMinutes: Int = 60,
@@ -167,11 +159,13 @@ class PlannerMediator(syncGoogleCalendar: Boolean, activity: Activity?, starting
         return insertedEvents
     }
 
+    /** Add the list of PlannerTask to the calendar **/
     fun addTasksList(tasks: List<PlannerTask>): MutableList<MutableList<PlannerEvent>>? {
         // returns list of the inserted tasks (may not include all tasks if failed on any of them
         return PlannerSolver.addTasks(tasks, calendar)
     }
 
+    /** Turn given time intervals to a list of date-specific time intervals for this calendar  **/
     @SuppressLint("SimpleDateFormat")
     private fun turnTimesIntoDates(timeIntervals: List<Pair<Pair<Int, Int>, Pair<Int, Int>>>?): List<Pair<Long, Long>> {
         val dateIntervals = mutableListOf<Pair<Long, Long>>()
@@ -195,6 +189,7 @@ class PlannerMediator(syncGoogleCalendar: Boolean, activity: Activity?, starting
         return dateIntervals
     }
 
+    /** Add or rewrite tag with given name **/
     fun addOrRewriteTag(
         title: String,
         forbiddenTimeIntervals: List<Pair<Pair<Int, Int>, Pair<Int, Int>>>? = null,
@@ -217,16 +212,19 @@ class PlannerMediator(syncGoogleCalendar: Boolean, activity: Activity?, starting
         return tag
     }
 
+    /** Get list of tag names in the calendar **/
     fun getTagNameList(): MutableList<String>? {
         return calendar.tagNames;
     }
 
+    /** Remove the tag with given name from the calendar **/
     fun removeTag(title: String) {
         if (calendar.containsTag(title)) {
             calendar.removeTag(title)
         }
     }
 
+    /** Rename the tag with given name in the calendar **/
     fun renameTag(oldTitle: String, newTitle: String): PlannerTag? {
         if (!calendar.containsTag(oldTitle)) {
             return null
@@ -239,6 +237,7 @@ class PlannerMediator(syncGoogleCalendar: Boolean, activity: Activity?, starting
         return tag
     }
 
+    /** Add a time interval to the list of tag's time intervals **/
     fun addToTag(
         title: String, forbiddenTimeInterval: Pair<Pair<Int, Int>, Pair<Int, Int>>? = null,
         preferredTimeInterval: Pair<Pair<Int, Int>, Pair<Int, Int>>? = null
@@ -257,6 +256,7 @@ class PlannerMediator(syncGoogleCalendar: Boolean, activity: Activity?, starting
         return tag
     }
 
+    /** results of Google Calendar permissions request **/
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,

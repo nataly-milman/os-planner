@@ -176,7 +176,6 @@ public class PlannerCalendar {
         return merged;
     }
 
-    // todo add task splitting
     private LinkedList<PlannerEvent> insertUntaggedTaskHelper(PlannerTask task, Iterator<IInterval> possibleIterator) {
         LinkedList<PlannerEvent> assignments = new LinkedList<>();
         long desiredDuration = task.getDurationInMillis() + spaceBetweenTasks;
@@ -259,11 +258,6 @@ public class PlannerCalendar {
         }
 
         return insertTaskHelper(task, freeTimeIt, tag.getForbiddenTimeIntervalsTree());
-    }
-
-    public List<PlannerEvent> forceInsertTask(PlannerTask task) {
-        // todo implement
-        return new LinkedList<>();
     }
 
     public boolean removeEvent(PlannerEvent event) {

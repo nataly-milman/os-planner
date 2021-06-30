@@ -20,8 +20,8 @@ abstract class PlannerObject {
     protected String tag;
 
     //constructors
+    /** Create PlannerObject from its title **/
     protected PlannerObject(String title) {
-        super();
         this.title = title;
         if (title == null || title.isEmpty()) {
             this.title = NO_TITLE;
@@ -34,6 +34,7 @@ abstract class PlannerObject {
     }
 
     // validity check
+    /** Input parameters validity check **/
     public static boolean isValid(int reminder) {
         // title, description, location, exclusiveForItsTimeSlot - no predefined ranges
         if (reminder < -1){
@@ -44,10 +45,12 @@ abstract class PlannerObject {
     }
 
     // methods
+    /** Get PlannerObject's title **/
     public String getTitle() {
         return title;
     }
 
+    /** Set PlannerObject's title **/
     public void setTitle(String title) {
         if (title == null || title.isEmpty()) {
             this.title = NO_TITLE;
@@ -56,26 +59,32 @@ abstract class PlannerObject {
         }
     }
 
+    /** Get PlannerObject's description **/
     public String getDescription() {
         return description;
     }
 
+    /** Set PlannerObject's description **/
     public void setDescription(String description) {
         this.description = description;
     }
 
+    /** Get PlannerObject's location **/
     public String getLocation() {
         return location;
     }
 
+    /** Set PlannerObject's location **/
     public void setLocation(String location) {
         this.location = location;
     }
 
+    /** Get PlannerObject's reminder time in minutes, -1 for no reminder **/
     public int getReminder() {
         return reminder;
     }
 
+    /** Set PlannerObject's reminder time in minutes, -1 for no reminder **/
     public void setReminder(int reminder) {
         if (reminder < 0) {
             this.reminder = -1;
@@ -84,18 +93,22 @@ abstract class PlannerObject {
         }
     }
 
+    /** Get the name of the tag object connected to this task **/
     public String getTagName() {
         return tag;
     }
 
+    /** Set the name of the tag object connected to this task **/
     public void setTagName(String tag) {
         this.tag = tag;
     }
 
+    /** Get whether or not some other event can be defined at the same time with this **/
     public boolean isExclusiveForItsTimeSlot() {
         return exclusiveForItsTimeSlot;
     }
 
+    /** Set whether or not some other event can be defined at the same time with this **/
     public void setExclusiveForItsTimeSlot(boolean exclusiveForItsTimeSlot) {
         this.exclusiveForItsTimeSlot = exclusiveForItsTimeSlot;
     }

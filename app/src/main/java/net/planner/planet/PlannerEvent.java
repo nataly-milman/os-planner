@@ -17,6 +17,7 @@ public class PlannerEvent extends PlannerObject {
     private final PlannerTask parentTask;
 
     // constructors
+    /** Create PlannerEvent object from its title and times **/
     public PlannerEvent(String title, long startTime, long endTime) {
         super(title);
         this.parentTask = null;
@@ -31,6 +32,7 @@ public class PlannerEvent extends PlannerObject {
         this.isAllDay = false;
     }
 
+    /** Create PlannerEvent object from the relevant Planner Task and times **/
     public PlannerEvent(PlannerTask task, long startTime, long endTime) {
         super(task.title);
         this.title = task.title;
@@ -40,7 +42,9 @@ public class PlannerEvent extends PlannerObject {
         this.isAllDay = false;
         this.parentTask = task;
     }
+
     // validity check
+    /** Input parameters validity check **/
     public static boolean isValid(int reminder, long startTime, long endTime) {
         if (!PlannerObject.isValid(reminder)) {
             return false;
@@ -60,6 +64,7 @@ public class PlannerEvent extends PlannerObject {
     }
 
     // methods
+    /** Get start time of the event in milliseconds **/
     public long getStartTime() {
         return startTime;
     }
@@ -81,6 +86,7 @@ public class PlannerEvent extends PlannerObject {
         return true;
     }
 
+    /** Get end time of the event in milliseconds **/
     public long getEndTime() {
         return endTime;
     }
@@ -99,11 +105,12 @@ public class PlannerEvent extends PlannerObject {
         return true;
     }
 
+    /** Set event id from Google Calendar **/
     public void setEventId(long eventId) {
         this.eventId = eventId;
     }
 
-    /** Takes time in milliseconds and returns time of + delta days at 00:00 AM **/
+    /** Gets time in milliseconds and returns time of + delta days at 00:00 AM **/
     private long moveDeltaDaysTime(long timeInMillis, int delta, boolean force){
         long newTimeInMillis = timeInMillis;
         Calendar timeAsCal = Calendar.getInstance();
@@ -129,6 +136,7 @@ public class PlannerEvent extends PlannerObject {
         }
     }
 
+    /** Return PlannerTask object related to this event or null if there is none **/
     public final PlannerTask getParentTask() {
         return parentTask;
     }
