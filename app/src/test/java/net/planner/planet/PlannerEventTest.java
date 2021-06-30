@@ -90,4 +90,47 @@ public class PlannerEventTest {
         Assert.assertTrue(PlannerEvent.isValid(-1, date2, date2));
         Assert.assertTrue(PlannerEvent.isValid(-1, date1, date2));
     }
+
+    @Test
+    public void testAllDay() {
+        SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd h:mm");
+        try {
+            long date1 = Objects.requireNonNull(ft.parse("2021-05-16 6:00")).getTime();
+            long date2 = Objects.requireNonNull(ft.parse("2021-05-16 7:00")).getTime();
+            long sod = Objects.requireNonNull(ft.parse("2021-05-16 00:00")).getTime();
+            long eod = Objects.requireNonNull(ft.parse("2021-05-17 00:00")).getTime();
+
+            PlannerEvent pe = new PlannerEvent("Test all day settings", date1, date2);
+            pe.setAllDay(true);
+            Assert.assertEquals(new Date(sod), new Date(pe.getStartTime()));  // starts 17th
+            Assert.assertEquals(new Date(eod), new Date(pe.getEndTime()));  // ends 17th
+
+            Assert.assertFalse(pe.setEndTime(date2));
+            Assert.assertFalse(pe.setStartTime(date1));
+
+            date2 = Objects.requireNonNull(ft.parse("2021-05-16 7:40")).getTime();
+            pe = new PlannerEvent("Test all day settings", date1, date2);
+            pe.setAllDay(true);
+            Assert.assertEquals(new Date(sod), new Date(pe.getStartTime()));  // starts 17th
+            Assert.assertEquals(new Date(eod), new Date(pe.getEndTime()));  // ends 17th
+
+            date1 = Objects.requireNonNull(ft.parse("2021-05-16 00:00")).getTime();
+            date2 = Objects.requireNonNull(ft.parse("2021-05-16 00:00")).getTime();
+            pe = new PlannerEvent("Test all day settings", date1, date2);
+            pe.setAllDay(true);
+            Assert.assertEquals(new Date(sod), new Date(pe.getStartTime()));  // starts 16th
+            Assert.assertEquals(new Date(eod), new Date(pe.getEndTime()));  // ends 17th
+
+            date2 = Objects.requireNonNull(ft.parse("2021-05-17 7:40")).getTime();
+            eod = Objects.requireNonNull(ft.parse("2021-05-18 00:00")).getTime();
+            pe = new PlannerEvent("Test all day settings", date1, date2);
+            pe.setAllDay(true);
+            Assert.assertEquals(new Date(sod), new Date(pe.getStartTime()));  // starts 17th
+            Assert.assertEquals(new Date(eod), new Date(pe.getEndTime()));  // ends 18th
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

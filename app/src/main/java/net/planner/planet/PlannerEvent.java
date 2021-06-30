@@ -1,9 +1,9 @@
 package net.planner.planet;
 
-import android.icu.util.DateInterval;
 import android.util.Log;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Objects;
 
@@ -28,7 +28,7 @@ public class PlannerEvent extends PlannerObject {
         this.startTime = startTime;
         this.endTime = endTime;
         this.eventId = -1L;
-        this.isAllDay = false; // @TODO check duration?
+        this.isAllDay = false;
     }
 
     public PlannerEvent(PlannerTask task, long startTime, long endTime) {
@@ -37,7 +37,7 @@ public class PlannerEvent extends PlannerObject {
         this.startTime = startTime;
         this.endTime = endTime;
         this.eventId = -1L;
-        this.isAllDay = false; // @TODO check duration?
+        this.isAllDay = false;
         this.parentTask = task;
     }
     // validity check
@@ -64,9 +64,15 @@ public class PlannerEvent extends PlannerObject {
         return startTime;
     }
 
+    /** Set start time for the event in milliseconds, midnight only for all day events **/
     public boolean setStartTime(long startTime) {
         if (startTime < 0) {
             Log.e(TAG,"Illegal start time: Time cannot be negative");
+            return false;
+        }
+
+        if (this.isAllDay && moveDeltaDaysTime(startTime,0, false) != endTime){
+            Log.e(TAG,"Illegal start time: all day events should start at midnight");
             return false;
         }
         long duration = this.endTime - this.startTime;
@@ -79,9 +85,14 @@ public class PlannerEvent extends PlannerObject {
         return endTime;
     }
 
+    /** Set end time for the event in milliseconds, midnight only for all day events **/
     public boolean setEndTime(long endTime) {
         if (this.startTime > endTime) {
             Log.e(TAG,"Illegal end time: Event cannot end before it starts");
+            return false;
+        }
+        if (this.isAllDay && moveDeltaDaysTime(endTime,0, false) != endTime){
+            Log.e(TAG,"Illegal end time: all day events should end at midnight");
             return false;
         }
         this.endTime = endTime;
@@ -92,8 +103,30 @@ public class PlannerEvent extends PlannerObject {
         this.eventId = eventId;
     }
 
+    /** Takes time in milliseconds and returns time of + delta days at 00:00 AM **/
+    private long moveDeltaDaysTime(long timeInMillis, int delta, boolean force){
+        long newTimeInMillis = timeInMillis;
+        Calendar timeAsCal = Calendar.getInstance();
+        timeAsCal.setTimeInMillis( timeInMillis );
+        if (force || timeAsCal.get(Calendar.HOUR) != 0 || timeAsCal.get(Calendar.MINUTE) != 0) {
+            timeAsCal.add(Calendar.DATE, delta);
+            timeAsCal.set(Calendar.HOUR, 0);
+            timeAsCal.set(Calendar.MINUTE, 0);
+            newTimeInMillis = timeAsCal.getTimeInMillis();
+        }
+        return newTimeInMillis;
+    }
+
+    /** All day events are from 00:00AM of the first day until 00:00AM of the one after the last **/
     public void setAllDay(boolean isAllDay) {
         this.isAllDay = isAllDay;
+        if (isAllDay) {
+            startTime = moveDeltaDaysTime(startTime, 0, false);
+            endTime = moveDeltaDaysTime(endTime, 1, false);
+            if (startTime == endTime){
+                endTime = moveDeltaDaysTime(endTime, 1, true);
+            }
+        }
     }
 
     public final PlannerTask getParentTask() {
