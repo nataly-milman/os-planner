@@ -8,6 +8,7 @@ import java.util.TreeMap;
 
 public class PlannerSolver {
 
+    /** Sort tasks depending on their priorities and priorities of their tags from the calendar **/
     private static LinkedList<PlannerTask> sortTasks(List<PlannerTask> tasks, PlannerCalendar calendar) {
         LinkedList<PlannerTask> sortedTasks = new LinkedList<>();
         TreeMap<Integer, LinkedList<PlannerTask>> tasksByTagPriority = new TreeMap<>();
@@ -34,6 +35,7 @@ public class PlannerSolver {
         return sortedTasks;
     }
 
+    /** Add a list of tasks to the calendar depending on tags and priorities **/
     public static List<List<PlannerEvent>> addTasks(List<PlannerTask> tasks, PlannerCalendar calendar) {
         LinkedList<List<PlannerEvent>> addedTasks = new LinkedList<>();
         for (PlannerTask task : sortTasks(tasks, calendar)) {
@@ -48,13 +50,12 @@ public class PlannerSolver {
         return addedTasks;
     }
 
+    /** Add one task to the calendar **/
     public static List<PlannerEvent> addTask(PlannerTask task, PlannerCalendar calendar) {
-        List<PlannerEvent> addedEvents = calendar.insertTask(task);
+        List<PlannerEvent> addedEvents = calendar.preferredInsertTask(task);
+        if (addedEvents.size() == 0){
+            addedEvents = calendar.insertTask(task);
+        }
         return addedEvents;
-
-        //if (!addedEvents.isEmpty()) {  //TODO all insertion logic here
-        //    return addedEvents;
-        //}
-        //return null;
     }
 }

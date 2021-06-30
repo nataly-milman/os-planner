@@ -1,8 +1,10 @@
 package net.planner.flow;
 
 import net.planner.planet.PlannerMediator;
+import net.planner.planet.PlannerSolver;
 import net.planner.planet.PlannerTask;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.text.ParseException;
@@ -44,8 +46,8 @@ public class FlowExample {
 
         long deadline = Objects.requireNonNull(ft.parse("2021-05-16 23:30")).getTime();
         // unknown tag is acceptable now
-        manager.addTask("Yoga", deadline, 45, "weird new tag", 5);
-        manager.addTask("Yoga 2", deadline, 45, "sport", 5);
+        Assert.assertTrue(manager.addTask("Yoga", deadline, 45, "weird new tag", 5).size() > 0);
+        Assert.assertTrue( manager.addTask("Yoga 2", deadline, 45, "sport", 5).size() > 0);
 
     }
 
@@ -55,7 +57,9 @@ public class FlowExample {
         SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd H:mm");
         long calendarTestFrom = Objects.requireNonNull(ft.parse("2021-05-13 0:00")).getTime();
         PlannerMediator manager = new PlannerMediator(false, null, calendarTestFrom);
-
+        long start = Objects.requireNonNull(ft.parse("2021-05-13 14:00")).getTime();
+        long end = Objects.requireNonNull(ft.parse("2021-05-14 12:00")).getTime();
+        manager.addEvent("trip", start, end, true);
 
         manager.addOrRewriteTag("sport", null, null, 6);
         manager.addOrRewriteTag("outside", null, null, 4);
@@ -64,15 +68,14 @@ public class FlowExample {
         // all day event for two days, start and end time wouldn't matter
         LinkedList<PlannerTask> tasks = new LinkedList<>();
         long deadline = Objects.requireNonNull(ft.parse("2021-05-13 14:00")).getTime();
-        tasks.add(manager.createTask("trip", deadline, 300, "outside", 4));
+        tasks.add(manager.createTask("trip", deadline, 30, "outside", 4));
         deadline = Objects.requireNonNull(ft.parse("2021-05-13 23:59")).getTime();
-        tasks.add(manager.createTask("hw infi", deadline, 120, "school", 7));
-        tasks.add(manager.createTask("hw oop", deadline, 120, "school", 9));
+        tasks.add(manager.createTask("hw infi", deadline, 60, "school", 7));
+        tasks.add(manager.createTask("hw oop", deadline, 60, "school", 9));
         deadline = Objects.requireNonNull(ft.parse("2021-05-16 06:00")).getTime();
-        tasks.add(manager.createTask("trip part 2", deadline, 150, "outside", 5));
+        tasks.add(manager.createTask("trip part 2", deadline, 40, "outside", 5));
         tasks.add(manager.createTask("sport", deadline, 45, "sport", 8));
-
-        manager.addTasksList(tasks);
+        Assert.assertTrue(manager.addTasksList(tasks).size() > 0);
 
     }
 }
